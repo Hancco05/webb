@@ -1,12 +1,13 @@
-sistema-login/
-├── docker-compose.yml
-├── php/
-│   └── Dockerfile
-├── mysql/
-│   └── init.sql
-└── www/
-    ├── index.php          (login)
-    ├── logout.php
-    ├── dashboard_admin.php
-    ├── dashboard_secundario.php
-    └── dashboard_usuario.php
+www/
+├── includes/
+│   └── db.php              ← conexión centralizada
+├── admin/
+│   ├── usuarios.php        ← CRUD completo
+│   ├── crear_usuario.php
+│   ├── editar_usuario.php
+│   └── eliminar_usuario.php
+├── shared/
+│   ├── perfil.php          ← editar perfil (los 3 roles)
+│   └── cambiar_password.php
+└── logs/
+    └── actividad.php       ← registro de actividad
