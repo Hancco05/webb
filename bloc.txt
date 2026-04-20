@@ -1,15 +1,42 @@
-www/
-├── includes/
-│   └── db.php              ← conexión centralizada
-├── admin/
-│   ├── usuarios.php        ← CRUD completo
-│   ├── crear_usuario.php
-│   ├── editar_usuario.php
-│   └── eliminar_usuario.php
-├── shared/
-│   ├── perfil.php          ← editar perfil (los 3 roles)
-│   └── cambiar_password.php
-└── logs/
-    └── actividad.php       ← registro de actividad
-
-    actualizar
+colegio-sistema/
+├── docker-compose.yml
+├── php/Dockerfile
+├── mysql/init.sql
+└── www/
+    ├── index.php                  ← Login institucional
+    ├── logout.php
+    ├── includes/
+    │   ├── db.php                 ← Conexión + funciones globales
+    │   ├── auth.php               ← Verificador de sesión por rol
+    │   └── header.php             ← Sidebar dinámico por rol
+    ├── director/                  ← Admin Principal
+    │   ├── dashboard.php
+    │   ├── usuarios.php           ← CRUD completo
+    │   ├── cursos.php             ← Gestión de cursos
+    │   ├── asignaturas.php
+    │   ├── noticias.php
+    │   └── reportes.php           ← PDF/Word
+    ├── profesor/                  ← Admin Secundario
+    │   ├── dashboard.php
+    │   ├── mis_cursos.php
+    │   ├── notas.php
+    │   ├── asistencia.php
+    │   └── reportes.php
+    ├── auxiliar/                  ← Portero / Asistente patio
+    │   ├── dashboard.php
+    │   └── asistencia.php
+    ├── estudiante/
+    │   ├── dashboard.php
+    │   ├── mis_notas.php
+    │   └── asistencia.php
+    ├── apoderado/
+    │   ├── dashboard.php
+    │   ├── hijos.php
+    │   ├── notas.php
+    │   ├── asistencia.php
+    │   ├── noticias.php
+    │   ├── recordatorios.php
+    │   └── reportes.php           ← PDF/Word del hijo
+    └── shared/
+        ├── perfil.php
+        └── cambiar_password.php
