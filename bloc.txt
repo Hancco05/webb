@@ -11,3 +11,5 @@ www/
 │   └── cambiar_password.php
 └── logs/
     └── actividad.php       ← registro de actividad
+
+    actualizar!
