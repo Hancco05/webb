@@ -12,4 +12,4 @@ www/
 └── logs/
     └── actividad.php       ← registro de actividad
 
-    actualizar!
+    actualizar
