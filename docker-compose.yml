@@ -3,7 +3,7 @@ version: '3.8'
 services:
   php:
     build: ./php
-    container_name: php_app
+    container_name: webb_php
     ports:
       - "8080:80"
     volumes:
@@ -11,40 +11,42 @@ services:
     depends_on:
       - mysql
     networks:
-      - red_sistema
+      - webb_net
 
   mysql:
     image: mysql:8.0
-    container_name: mysql_db
+    container_name: webb_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: sistema_login
-    ports:
-      - "3306:3306"
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: webb_db
+      MYSQL_USER: webb_user
+      MYSQL_PASSWORD: webb_pass
     volumes:
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - mysql_data:/var/lib/mysql
+      - webb_mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
-      - red_sistema
+      - webb_net
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    restart: always
+    container_name: webb_phpmyadmin
     ports:
       - "8081:80"
     environment:
       PMA_HOST: mysql
       PMA_USER: root
-      PMA_PASSWORD: root123
+      PMA_PASSWORD: root1234
     depends_on:
       - mysql
     networks:
-      - red_sistema
+      - webb_net
 
 volumes:
-  mysql_data:
+  webb_mysql_data:
 
 networks:
-  red_sistema:
+  webb_net:
+    driver: bridge

@@ -1,14 +1,24 @@
-FROM php:8.1-apache
+FROM php:8.2-apache
+
+# Extensiones necesarias
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip unzip curl git \
-    && docker-php-ext-install mysqli pdo pdo_mysql zip \
-    && a2enmod rewrite
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    zip \
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql mysqli gd
 
-# Instalar Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Habilitar mod_rewrite
+RUN a2enmod rewrite
 
-# Instalar librerías PHP para PDF y Word
-WORKDIR /var/www/html
-RUN composer require tecnickcom/tcpdf phpoffice/phpword --no-interaction 2>/dev/null || true
+# Configuración Apache permisiva para desarrollo
+RUN echo '<Directory /var/www/html>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' > /etc/apache2/conf-available/custom.conf \
+    && a2enconf custom
 
-WORKDIR /var/www/html
+EXPOSE 80

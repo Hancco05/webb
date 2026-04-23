@@ -1,17 +1,26 @@
 <?php
-function getDB() {
-    $conn = new mysqli("mysql", "root", "root123", "sistema_login");
-    if ($conn->connect_error) {
-        die("Error de conexión: " . $conn->connect_error);
-    }
-    $conn->set_charset("utf8");
-    return $conn;
-}
+// www/includes/db.php
 
-function registrarActividad($conn, $usuario_id, $accion, $detalle = "") {
-    $stmt = $conn->prepare("INSERT INTO actividad_log (usuario_id, accion, detalle, ip) VALUES (?, ?, ?, ?)");
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'desconocida';
-    $stmt->bind_param("isss", $usuario_id, $accion, $detalle, $ip);
-    $stmt->execute();
-    $stmt->close();
+define('DB_HOST', 'mysql');
+define('DB_NAME', 'webb_db');
+define('DB_USER', 'webb_user');
+define('DB_PASS', 'webb_pass');
+define('DB_CHARSET', 'utf8mb4');
+
+function getDB(): PDO {
+    static $pdo = null;
+    if ($pdo === null) {
+        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+        try {
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+        } catch (PDOException $e) {
+            die(json_encode(['error' => 'DB connection failed: ' . $e->getMessage()]));
+        }
+    }
+    return $pdo;
 }
