@@ -1,4 +1,4 @@
-colegio-sistema/
+webb/
 ├── docker-compose.yml
 ├── php/Dockerfile
 ├── mysql/init.sql
