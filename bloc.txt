@@ -20,3 +20,6 @@ webb/
 │   ├── shared/ (perfil.php, cambiar_password.php)
 │   └── ajax/ (asignaturas_por_curso.php)
 └── composer.json
+
+
+paso 2
