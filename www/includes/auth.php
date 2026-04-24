@@ -1,33 +1,50 @@
 <?php
-// www/includes/auth.php
+session_start();
+require_once 'db.php';
 
-function requireLogin(): void {
-    if (session_status() === PHP_SESSION_NONE) session_start();
-    if (empty($_SESSION['usuario_id'])) {
-        header('Location: /index.php');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password_hash'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['nombre'] = $user['nombre'];
+        $_SESSION['rol'] = $user['rol'];
+        
+        // Redirección según rol
+        $rol = $user['rol'];
+        if ($rol === 'director') {
+            header('Location: ../director/dashboard.php');
+        } elseif ($rol === 'profesor') {
+            header('Location: ../profesor/dashboard.php');
+        } elseif ($rol === 'auxiliar') {
+            header('Location: ../auxiliar/dashboard.php');
+        } elseif ($rol === 'estudiante') {
+            header('Location: ../estudiante/dashboard.php');
+        } elseif ($rol === 'apoderado') {
+            header('Location: ../apoderado/dashboard.php');
+        } else {
+            header('Location: ../logout.php');
+        }
+        exit;
+    } else {
+        header('Location: ../index.php?error=1');
         exit;
     }
-}
-
-function requireRole(string|array $roles): void {
-    requireLogin();
-    $roles = (array) $roles;
-    if (!in_array($_SESSION['rol'], $roles, true)) {
-        http_response_code(403);
-        die('<h1>403 — Acceso denegado</h1><p>No tienes permisos para esta sección.</p><a href="/index.php">Volver</a>');
+} else {
+    function verificarSesion($rol_permitido = null) {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ../index.php');
+            exit;
+        }
+        if ($rol_permitido && $_SESSION['rol'] !== $rol_permitido) {
+            header('Location: ../index.php?error=acceso');
+            exit;
+        }
     }
 }
-
-function isLoggedIn(): bool {
-    if (session_status() === PHP_SESSION_NONE) session_start();
-    return !empty($_SESSION['usuario_id']);
-}
-
-function currentUser(): array {
-    return [
-        'id'     => $_SESSION['usuario_id']  ?? null,
-        'nombre' => $_SESSION['nombre']       ?? '',
-        'email'  => $_SESSION['email']        ?? '',
-        'rol'    => $_SESSION['rol']          ?? '',
-    ];
-}
+?>
