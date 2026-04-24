@@ -1,26 +1,40 @@
-<?php
-// www/includes/db.php
+// ... (código anterior)
 
-define('DB_HOST', 'mysql');
-define('DB_NAME', 'webb_db');
-define('DB_USER', 'webb_user');
-define('DB_PASS', 'webb_pass');
-define('DB_CHARSET', 'utf8mb4');
+// Obtener cursos de un profesor
+function obtenerCursosPorProfesor($profesor_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT c.* FROM cursos c
+        JOIN profesor_asignatura_curso pac ON c.id = pac.curso_id
+        WHERE pac.profesor_id = ?
+    ");
+    $stmt->execute([$profesor_id]);
+    return $stmt->fetchAll();
+}
 
-function getDB(): PDO {
-    static $pdo = null;
-    if ($pdo === null) {
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-        try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            die(json_encode(['error' => 'DB connection failed: ' . $e->getMessage()]));
-        }
-    }
-    return $pdo;
+// Obtener asignaturas de un profesor para un curso
+function obtenerAsignaturasPorProfesorCurso($profesor_id, $curso_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT a.* FROM asignaturas a
+        JOIN profesor_asignatura_curso pac ON a.id = pac.asignatura_id
+        WHERE pac.profesor_id = ? AND pac.curso_id = ?
+    ");
+    $stmt->execute([$profesor_id, $curso_id]);
+    return $stmt->fetchAll();
+}
+
+// Obtener hijos de un apoderado
+function obtenerHijos($apoderado_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT u.*, e.curso_id, c.nombre as curso_nombre 
+        FROM usuarios u
+        JOIN apoderado_estudiante ae ON u.id = ae.estudiante_id
+        JOIN estudiantes e ON u.id = e.user_id
+        JOIN cursos c ON e.curso_id = c.id
+        WHERE ae.apoderado_id = ?
+    ");
+    $stmt->execute([$apoderado_id]);
+    return $stmt->fetchAll();
 }
