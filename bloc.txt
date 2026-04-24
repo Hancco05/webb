@@ -23,3 +23,14 @@ webb/
 
 
 paso 2
+
+webb/
+└── www/
+    ├── director/
+    │   └── dashboard.php
+    ├── includes/
+    │   ├── db.php
+    │   ├── auth.php
+    │   ├── header.php   ← este debe existir
+    │   └── footer.php   ← este también
+    └── ...
