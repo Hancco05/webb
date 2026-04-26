@@ -33,4 +33,4 @@ webb/
     │   ├── auth.php
     │   ├── header.php   ← este debe existir
     │   └── footer.php   ← este también
-    └── ...
+    └── ...!!!
