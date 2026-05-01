@@ -35,5 +35,3 @@ webb/
     │   └── footer.php   ← este también
     └── ..
 
-
-    AVANCES!!!
