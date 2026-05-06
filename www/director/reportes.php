@@ -48,6 +48,8 @@ if (isset($_GET['tipo'])) {
             <div class="card-header">Generar Reporte</div>
             <div class="card-body">
                 <a href="?tipo=usuarios" class="btn btn-primary" target="_blank">Reporte de Usuarios (PDF)</a>
+                <a href="exportar_excel.php?tipo=usuarios" class="btn btn-success">Exportar usuarios a Excel</a>
+                <a href="exportar_excel.php?tipo=cursos" class="btn btn-success">Exportar cursos a Excel</a>
                 <a href="?tipo=cursos" class="btn btn-success" target="_blank">Reporte de Cursos (PDF)</a>
             </div>
         </div>
