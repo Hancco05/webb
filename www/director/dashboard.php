@@ -30,13 +30,12 @@ $asistenciaMensual = $pdo->query("
     ORDER BY mes DESC
     LIMIT 6
 ")->fetchAll();
-// Invertir para orden cronológico ascendente
 $meses = array_reverse(array_column($asistenciaMensual, 'mes'));
 $presentes = array_reverse(array_column($asistenciaMensual, 'presentes'));
 $ausentes = array_reverse(array_column($asistenciaMensual, 'ausentes'));
 $tardes = array_reverse(array_column($asistenciaMensual, 'tardes'));
 
-// (Opcional) Promedio de notas por curso (solo si hay notas)
+// Promedio de notas por curso
 $promediosPorCurso = $pdo->query("
     SELECT c.nombre as curso, AVG(n.nota) as promedio
     FROM notas n
@@ -48,6 +47,18 @@ $promediosPorCurso = $pdo->query("
 $cursosPromedio = array_column($promediosPorCurso, 'curso');
 $promedios = array_column($promediosPorCurso, 'promedio');
 ?>
+
+<!-- Botones de exportación a Excel (avance anterior) -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="btn-group" role="group">
+            <a href="exportar_excel.php?tipo=usuarios" class="btn btn-success"><i class="bi bi-file-excel"></i> Exportar usuarios a Excel</a>
+            <a href="exportar_excel.php?tipo=cursos" class="btn btn-success"><i class="bi bi-file-excel"></i> Exportar cursos a Excel</a>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de resumen -->
 <div class="row">
     <div class="col-md-4 mb-3">
         <div class="card text-white bg-primary"><div class="card-body"><h5>Usuarios</h5><p class="display-4"><?= $totalUsers ?></p></div></div>
@@ -60,6 +71,7 @@ $promedios = array_column($promediosPorCurso, 'promedio');
     </div>
 </div>
 
+<!-- Gráfico de usuarios por rol y últimos usuarios -->
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card h-100">
@@ -95,6 +107,7 @@ $promedios = array_column($promediosPorCurso, 'promedio');
     </div>
 </div>
 
+<!-- Gráficos de asistencia y promedios -->
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card">
@@ -130,7 +143,7 @@ new Chart(ctxRoles, {
     }
 });
 
-// Gráfico de asistencia mensual (solo si hay datos)
+// Gráfico de asistencia mensual
 <?php if(!empty($meses)): ?>
 const ctxAsistencia = document.getElementById('asistenciaChart').getContext('2d');
 new Chart(ctxAsistencia, {
@@ -168,6 +181,14 @@ new Chart(ctxNotas, {
 });
 <?php else: ?>
 document.getElementById('notasChart').parentNode.innerHTML = '<div class="alert alert-info">No hay notas registradas aún.</div>';
+<?php endif; ?>
+
+// Mostrar mensaje de bienvenida con toast (si existe sesión de mensaje)
+<?php if(isset($_SESSION['mensaje'])): ?>
+    window.addEventListener('DOMContentLoaded', function() {
+        mostrarMensaje('<?= addslashes($_SESSION['mensaje']); ?>');
+    });
+    <?php unset($_SESSION['mensaje']); ?>
 <?php endif; ?>
 </script>
 
