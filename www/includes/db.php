@@ -35,7 +35,8 @@ function obtenerAsignaturasPorCurso($curso_id) {
 function obtenerEstudiantesPorCurso($curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("
-        SELECT u.* FROM usuarios u 
+        SELECT u.id, u.nombre, u.email 
+        FROM usuarios u 
         JOIN estudiantes e ON u.id = e.user_id 
         WHERE e.curso_id = ? AND u.rol = 'estudiante'
     ");
@@ -84,5 +85,43 @@ function obtenerHijos($apoderado_id) {
     ");
     $stmt->execute([$apoderado_id]);
     return $stmt->fetchAll();
+}
+
+// ========== NUEVAS FUNCIONES PARA HORARIOS ==========
+function obtenerHorariosPorCurso($curso_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT h.*, a.nombre as asignatura_nombre 
+        FROM horarios h
+        JOIN asignaturas a ON h.asignatura_id = a.id
+        WHERE h.curso_id = ?
+        ORDER BY FIELD(h.dia_semana, 'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'), h.hora_inicio
+    ");
+    $stmt->execute([$curso_id]);
+    return $stmt->fetchAll();
+}
+
+function guardarHorario($curso_id, $dia, $hora_inicio, $hora_fin, $asignatura_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO horarios (curso_id, dia_semana, hora_inicio, hora_fin, asignatura_id) VALUES (?,?,?,?,?)");
+    return $stmt->execute([$curso_id, $dia, $hora_inicio, $hora_fin, $asignatura_id]);
+}
+
+function eliminarHorario($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM horarios WHERE id = ?");
+    return $stmt->execute([$id]);
+}
+
+// ========== FUNCIONES CSRF ==========
+function generarTokenCSRF() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verificarTokenCSRF($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 ?>
