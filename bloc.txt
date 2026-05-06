@@ -35,4 +35,57 @@ webb/
     │   └── footer.php   ← este también
     └── ..
 
-!!!!!!!!°°
+
+estructura de sistema ahora 
+
+webb/
+├── docker-compose.yml
+├── composer.json
+├── php/
+│   └── Dockerfile
+├── mysql/
+│   └── init.sql (incluye tabla horarios)
+└── www/
+    ├── index.php
+    ├── logout.php
+    ├── includes/
+    │   ├── db.php (con funciones horarios + CSRF)
+    │   ├── auth.php
+    │   ├── header.php (sidebar con enlaces a horarios)
+    │   └── footer.php
+    ├── director/
+    │   ├── dashboard.php (con gráfico Chart.js)
+    │   ├── usuarios.php (con CSRF)
+    │   ├── cursos.php (con CSRF)
+    │   ├── asignaturas.php
+    │   ├── noticias.php
+    │   └── reportes.php
+    ├── profesor/
+    │   ├── dashboard.php
+    │   ├── mis_cursos.php
+    │   ├── notas.php
+    │   ├── asistencia.php
+    │   ├── reportes.php
+    │   └── horarios.php (nuevo, CRUD)
+    ├── auxiliar/
+    │   ├── dashboard.php
+    │   └── asistencia.php
+    ├── estudiante/
+    │   ├── dashboard.php
+    │   ├── mis_notas.php
+    │   ├── asistencia.php
+    │   └── horarios.php (nuevo, solo lectura)
+    ├── apoderado/
+    │   ├── dashboard.php
+    │   ├── hijos.php
+    │   ├── notas.php
+    │   ├── asistencia.php
+    │   ├── noticias.php
+    │   ├── recordatorios.php
+    │   ├── reportes.php
+    │   └── horarios.php (nuevo, por hijo)
+    ├── shared/
+    │   ├── perfil.php
+    │   └── cambiar_password.php
+    └── ajax/
+        └── asignaturas_por_curso.php
