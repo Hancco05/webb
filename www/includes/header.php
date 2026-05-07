@@ -35,6 +35,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                     <?php elseif ($rol == 'profesor'): ?>
                         <li class="nav-item"><a href="mis_cursos.php" class="nav-link text-white"><i class="bi bi-book"></i> Mis Cursos</a></li>
                         <li class="nav-item"><a href="notas.php" class="nav-link text-white"><i class="bi bi-pencil-square"></i> Notas</a></li>
+                        <li class="nav-item"><a href="tareas.php" class="nav-link text-white"><i class="bi bi-list-check"></i> Tareas</a></li>
                         <li class="nav-item"><a href="horarios.php" class="nav-link text-white"><i class="bi bi-clock"></i> Horarios</a></li>
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Asistencia</a></li>
                         <li class="nav-item"><a href="reportes.php" class="nav-link text-white"><i class="bi bi-file-earmark-pdf"></i> Reportes</a></li>
