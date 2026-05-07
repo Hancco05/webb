@@ -10,6 +10,20 @@ services:
       - ./www:/var/www/html
     depends_on:
       - mysql
+    environment:
+      # Variables de conexión a la base de datos (ya existentes)
+      - DB_HOST=mysql
+      - DB_USER=webb_user
+      - DB_PASSWORD=webb_pass
+      - DB_NAME=webb_db
+      # NUEVAS variables para el envío de correos (SMTP)
+      - SMTP_HOST=smtp.mailtrap.io
+      - SMTP_PORT=2525
+      - SMTP_USER=tu_usuario_mailtrap    # <-- Reemplazar con tu usuario real
+      - SMTP_PASS=tu_contraseña_mailtrap # <-- Reemplazar con tu contraseña real
+      - SMTP_SECURE=tls
+      - MAIL_FROM=no-reply@colegio.com
+      - MAIL_FROM_NAME=Sistema Educativo
     networks:
       - webb_net
 
