@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['nombre'] = $user['nombre'];
         $_SESSION['rol'] = $user['rol'];
+        registrarLog($user['id'], 'login', null, null, "Inicio de sesión exitoso");
         
         // Redirección según rol
         $rol = $user['rol'];

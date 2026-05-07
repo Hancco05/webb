@@ -178,6 +178,58 @@ function eliminarTarea($id) {
     return $stmt->execute([$id]);
 }
 
+// ========== FUNCIONES PARA LOGS ==========
+function registrarLog($usuario_id, $accion, $tabla_afectada = null, $registro_id = null, $detalles = null) {
+    global $pdo;
+    // Obtener datos del usuario si no se pasan
+    $usuario = obtenerDatosUsuario($usuario_id);
+    $nombre = $usuario['nombre'];
+    $rol = $usuario['rol'];
+    
+    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+    
+    $stmt = $pdo->prepare("INSERT INTO logs (usuario_id, usuario_nombre, usuario_rol, accion, tabla_afectada, registro_id, detalles, ip_address, user_agent) VALUES (?,?,?,?,?,?,?,?,?)");
+    return $stmt->execute([$usuario_id, $nombre, $rol, $accion, $tabla_afectada, $registro_id, $detalles, $ip, $user_agent]);
+}
+
+function obtenerLogs($limite = 50, $offset = 0, $filtro_usuario = null, $filtro_accion = null) {
+    global $pdo;
+    $sql = "SELECT * FROM logs WHERE 1=1";
+    $params = [];
+    if ($filtro_usuario) {
+        $sql .= " AND usuario_id = ?";
+        $params[] = $filtro_usuario;
+    }
+    if ($filtro_accion) {
+        $sql .= " AND accion = ?";
+        $params[] = $filtro_accion;
+    }
+    $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $params[] = $limite;
+    $params[] = $offset;
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+function contarLogs($filtro_usuario = null, $filtro_accion = null) {
+    global $pdo;
+    $sql = "SELECT COUNT(*) FROM logs WHERE 1=1";
+    $params = [];
+    if ($filtro_usuario) {
+        $sql .= " AND usuario_id = ?";
+        $params[] = $filtro_usuario;
+    }
+    if ($filtro_accion) {
+        $sql .= " AND accion = ?";
+        $params[] = $filtro_accion;
+    }
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchColumn();
+}
+
 // ========== FUNCIÓN DE ENVÍO DE CORREOS ==========
 function enviarCorreo($destinatario, $asunto, $cuerpoHtml, $cuerpoTexto = '') {
     $mail = new PHPMailer(true);
