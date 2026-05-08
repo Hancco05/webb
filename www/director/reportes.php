@@ -22,7 +22,13 @@ if (isset($_GET['tipo'])) {
         echo "<h2>Reporte de Usuarios</h2><table>";
         echo "<tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Registro</th></tr>";
         foreach($data as $row) {
-            echo "<tr><td>{$row['id']}</td><td>{$row['nombre']}</td><td>{$row['email']}</td><td>{$row['rol']}</td><td>{$row['created_at']}</td></tr>";
+            echo "<tr>
+                    <td>{$row['id']}</td>
+                    <td>{$row['nombre']}</td>
+                    <td>{$row['email']}</td>
+                    <td>{$row['rol']}</td>
+                    <td>{$row['created_at']}</td>
+                </table>";
         }
         echo "</table>";
     } elseif ($tipo == 'cursos') {
@@ -30,10 +36,41 @@ if (isset($_GET['tipo'])) {
         echo "<h2>Reporte de Cursos</h2><table>";
         echo "<tr><th>ID</th><th>Nombre</th><th>Año</th><th>Estudiantes</th></tr>";
         foreach($data as $row) {
-            echo "<tr><td>{$row['id']}</td><td>{$row['nombre']}</td><td>{$row['anio']}</td><td>{$row['estudiantes']}</td></tr>";
+            echo "<tr>
+                    <td>{$row['id']}</td>
+                    <td>{$row['nombre']}</td>
+                    <td>{$row['anio']}</td>
+                    <td>{$row['estudiantes']}</td>
+                </tr>";
+        }
+        echo "</table>";
+    } elseif ($tipo == 'tareas') {
+        $data = $pdo->query("
+            SELECT t.titulo, c.nombre as curso, a.nombre as asignatura, 
+                   t.fecha_entrega, u.nombre as profesor
+            FROM tareas t
+            JOIN cursos c ON t.curso_id = c.id
+            JOIN asignaturas a ON t.asignatura_id = a.id
+            JOIN usuarios u ON t.creado_por = u.id
+            ORDER BY t.fecha_entrega
+        ")->fetchAll();
+        echo "<h2>Reporte de Tareas</h2><table>";
+        echo "<tr><th>Título</th><th>Curso</th><th>Asignatura</th><th>Fecha entrega</th><th>Profesor</th></tr>";
+        foreach($data as $row) {
+            echo "<tr>
+                    <td>{$row['titulo']}</td>
+                    <td>{$row['curso']}</td>
+                    <td>{$row['asignatura']}</td>
+                    <td>{$row['fecha_entrega']}</td>
+                    <td>{$row['profesor']}</td>
+                </tr>";
         }
         echo "</table>";
     }
+    ?>
+    </body>
+    </html>
+    <?php
     $html = ob_get_clean();
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'landscape');
@@ -43,14 +80,17 @@ if (isset($_GET['tipo'])) {
 }
 ?>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="card">
-            <div class="card-header">Generar Reporte</div>
+            <div class="card-header">Generar Reportes</div>
             <div class="card-body">
-                <a href="?tipo=usuarios" class="btn btn-primary" target="_blank">Reporte de Usuarios (PDF)</a>
-                <a href="exportar_excel.php?tipo=usuarios" class="btn btn-success">Exportar usuarios a Excel</a>
-                <a href="exportar_excel.php?tipo=cursos" class="btn btn-success">Exportar cursos a Excel</a>
-                <a href="?tipo=cursos" class="btn btn-success" target="_blank">Reporte de Cursos (PDF)</a>
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="?tipo=usuarios" class="btn btn-primary" target="_blank">📄 Reporte de Usuarios (PDF)</a>
+                    <a href="exportar_excel.php?tipo=usuarios" class="btn btn-success">📊 Exportar usuarios a Excel</a>
+                    <a href="?tipo=cursos" class="btn btn-primary" target="_blank">📄 Reporte de Cursos (PDF)</a>
+                    <a href="exportar_excel.php?tipo=cursos" class="btn btn-success">📊 Exportar cursos a Excel</a>
+                    <a href="?tipo=tareas" class="btn btn-info" target="_blank">📋 Reporte de Tareas (PDF)</a>
+                </div>
             </div>
         </div>
     </div>
