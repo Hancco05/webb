@@ -230,6 +230,49 @@ function contarLogs($filtro_usuario = null, $filtro_accion = null) {
     return $stmt->fetchColumn();
 }
 
+// ========== FUNCIONES PARA ENTREGAS DE TAREAS ==========
+function obtenerEntregasPorTarea($tarea_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT e.*, u.nombre as estudiante_nombre 
+        FROM entregas e
+        JOIN usuarios u ON e.estudiante_id = u.id
+        WHERE e.tarea_id = ?
+        ORDER BY e.fecha_entrega DESC
+    ");
+    $stmt->execute([$tarea_id]);
+    return $stmt->fetchAll();
+}
+
+function obtenerEntregaPorEstudianteTarea($estudiante_id, $tarea_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM entregas WHERE estudiante_id = ? AND tarea_id = ?");
+    $stmt->execute([$estudiante_id, $tarea_id]);
+    return $stmt->fetch();
+}
+
+function guardarEntrega($tarea_id, $estudiante_id, $archivo_nombre, $archivo_ruta, $comentario) {
+    global $pdo;
+    // Verificar si ya existe entrega
+    $stmt = $pdo->prepare("SELECT id FROM entregas WHERE tarea_id = ? AND estudiante_id = ?");
+    $stmt->execute([$tarea_id, $estudiante_id]);
+    if ($stmt->fetch()) {
+        // Actualizar
+        $stmt = $pdo->prepare("UPDATE entregas SET archivo_nombre=?, archivo_ruta=?, comentario=?, fecha_entrega=NOW() WHERE tarea_id=? AND estudiante_id=?");
+        return $stmt->execute([$archivo_nombre, $archivo_ruta, $comentario, $tarea_id, $estudiante_id]);
+    } else {
+        // Insertar
+        $stmt = $pdo->prepare("INSERT INTO entregas (tarea_id, estudiante_id, archivo_nombre, archivo_ruta, comentario) VALUES (?,?,?,?,?)");
+        return $stmt->execute([$tarea_id, $estudiante_id, $archivo_nombre, $archivo_ruta, $comentario]);
+    }
+}
+
+function calificarEntrega($entrega_id, $calificacion, $comentario_profesor) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE entregas SET calificacion=?, comentario_profesor=? WHERE id=?");
+    return $stmt->execute([$calificacion, $comentario_profesor, $entrega_id]);
+}
+
 // ========== FUNCIÓN DE ENVÍO DE CORREOS ==========
 function enviarCorreo($destinatario, $asunto, $cuerpoHtml, $cuerpoTexto = '') {
     $mail = new PHPMailer(true);
