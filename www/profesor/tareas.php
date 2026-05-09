@@ -89,6 +89,9 @@ $tareas = obtenerTareasPorProfesor($profesor_id);
                                 <td><?= htmlspecialchars($t['titulo']) ?></td>
                                 <td><?= htmlspecialchars($t['curso_nombre']) ?></td>
                                 <td><?= htmlspecialchars($t['asignatura_nombre']) ?></td>
+                                <th>Acción</th>
+                                ...
+                                <td><a href="ver_entregas.php?id=<?= $t['id'] ?>" class="btn btn-sm btn-info">Ver entregas</a></td>
                                 <td><?= $t['fecha_entrega'] ?></td>
                                 <td>
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar" onclick="editarTarea(<?= htmlspecialchars(json_encode($t)) ?>)">Editar</button>

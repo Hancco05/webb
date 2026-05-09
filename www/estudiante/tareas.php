@@ -33,6 +33,9 @@ $tareas = obtenerTareasPorCurso($curso_id);
                     <tr>
                         <td><?= htmlspecialchars($t['titulo']) ?></td>
                         <td><?= htmlspecialchars($t['asignatura_nombre']) ?></td>
+                        <th>Acción</th>
+...
+<td><a href="entregar_tarea.php?id=<?= $t['id'] ?>" class="btn btn-sm btn-primary">Entregar</a></td>
                         <td><?= $t['fecha_entrega'] ?></td>
                         <td><?= nl2br(htmlspecialchars($t['descripcion'])) ?></td>
                     </tr>
