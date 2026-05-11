@@ -120,6 +120,50 @@ $tareas = obtenerTareasPorProfesor($profesor_id);
     </div>
 </div>
 
+<!-- Modal entregas -->
+<div class="modal fade" id="modalEntregas<?= $t['id'] ?>" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Entregas - <?= htmlspecialchars($t['titulo']) ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <?php
+                $entregas = obtenerEntregasPorTarea($t['id']);
+                if (empty($entregas)): ?>
+                    <p>No hay entregas aún.</p>
+                <?php else: ?>
+                    <table class="table table-sm">
+                        <thead><tr><th>Estudiante</th><th>Archivo</th><th>Fecha</th><th>Calificación</th><th>Acción</th></tr></thead>
+                        <tbody>
+                        <?php foreach($entregas as $e): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($e['estudiante_nombre']) ?></td>
+                                <td><a href="../uploads/entregas/<?= $e['archivo_ruta'] ?>" target="_blank"><?= $e['archivo_nombre'] ?></a></td>
+                                <td><?= $e['fecha_entrega'] ?></td>
+                                <td>
+                                    <?php if ($e['calificacion'] !== null): ?>
+                                        <?= $e['calificacion'] ?>
+                                    <?php else: ?>
+                                        <form method="POST" action="calificar_entrega.php" class="d-inline">
+                                            <input type="hidden" name="entrega_id" value="<?= $e['id'] ?>">
+                                            <input type="number" step="0.1" name="calificacion" placeholder="Nota" style="width:70px" required>
+                                            <input type="text" name="comentario" placeholder="Comentario" style="width:150px">
+                                            <button type="submit" class="btn btn-sm btn-primary">Calificar</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal editar tarea -->
 <div class="modal fade" id="modalEditar" tabindex="-1">
     <div class="modal-dialog">
