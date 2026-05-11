@@ -43,6 +43,8 @@ services:
       - "3306:3306"
     networks:
       - webb_net
+    command: --innodb-buffer-pool-size=256M --query-cache-type=1 --query-cache-size=32M
+    
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
