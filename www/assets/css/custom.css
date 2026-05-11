@@ -63,3 +63,62 @@
     color: white;
     margin: 0;
 }
+
+/* Modo oscuro */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --navbar-bg: #f8f9fc;
+    --sidebar-bg: #0a2b4e;
+    --sidebar-text: #ffffff;
+    --sidebar-hover: #1e3a6b;
+}
+
+.dark-mode {
+    --bg-color: #1a1a2e;
+    --text-color: #e0e0e0;
+    --card-bg: #16213e;
+    --border-color: #2c2c3e;
+    --navbar-bg: #0f0f1a;
+    --sidebar-bg: #0a0a15;
+    --sidebar-text: #cccccc;
+    --sidebar-hover: #1a1a2e;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.table {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.table td, .table th {
+    border-color: var(--border-color);
+}
+
+.navbar-top {
+    background-color: var(--navbar-bg);
+    border-bottom-color: var(--border-color);
+}
+
+/* Sidebar en modo oscuro (ya usa colores fijos, podemos sobreescribir) */
+.dark-mode .sidebar {
+    background-color: var(--sidebar-bg) !important;
+}
+.dark-mode .sidebar .nav-link {
+    color: var(--sidebar-text) !important;
+}
+.dark-mode .sidebar .nav-link:hover {
+    background-color: var(--sidebar-hover) !important;
+}
