@@ -15,6 +15,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $titulo_pagina; ?> - Sistema Educativo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/custom.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
@@ -23,6 +24,10 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
             <!-- Sidebar simple -->
             <nav class="col-md-3 col-lg-2 d-md-block bg-dark text-white vh-100 p-3">
                 <h4 class="text-center">Sistema Educativo</h4>
+                <div class="sidebar-logo">
+                    <img src="/assets/img/logo.png" alt="Logo" class="img-fluid" style="max-width: 80%;">
+                    <h5 class="mt-2">Mi Colegio</h5>
+                </div>
                 <hr>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item"><a href="dashboard.php" class="nav-link text-white"><i class="bi bi-speedometer2"></i> Dashboard</a></li>

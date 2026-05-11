@@ -1,0 +1,65 @@
+/* Colores institucionales (ejemplo: azul marino y dorado) */
+:root {
+    --primary-color: #0a2b4e;
+    --secondary-color: #c49a2c;
+    --sidebar-bg: #0a2b4e;
+    --sidebar-hover: #1e3a6b;
+    --header-bg: #f8f9fc;
+}
+
+/* Sidebar personalizado */
+.sidebar {
+    background-color: var(--sidebar-bg) !important;
+}
+.sidebar .nav-link {
+    color: white !important;
+}
+.sidebar .nav-link:hover {
+    background-color: var(--sidebar-hover) !important;
+    border-radius: 5px;
+}
+.sidebar .nav-link i {
+    margin-right: 10px;
+}
+
+/* Navbar superior (si agregamos) */
+.navbar-top {
+    background-color: var(--header-bg);
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Botones personalizados */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.btn-primary:hover {
+    background-color: #0d3b6b;
+    border-color: #0d3b6b;
+}
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* Tarjetas del dashboard */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Logo en sidebar */
+.sidebar-logo {
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 15px;
+}
+.sidebar-logo h4 {
+    color: white;
+    margin: 0;
+}

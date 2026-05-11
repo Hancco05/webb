@@ -127,6 +127,54 @@ $promedios = array_column($promediosPorCurso, 'promedio');
     </div>
 </div>
 
+<!-- Nuevo row: tareas recientes -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Próximas tareas (próximos 7 días)</div>
+            <div class="card-body">
+                <?php
+                $proximas = $pdo->query("
+                    SELECT t.titulo, c.nombre as curso, t.fecha_entrega 
+                    FROM tareas t
+                    JOIN cursos c ON t.curso_id = c.id
+                    WHERE t.fecha_entrega BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+                    ORDER BY t.fecha_entrega LIMIT 5
+                ")->fetchAll();
+                if (empty($proximas)) echo "<p>No hay tareas próximas.</p>";
+                else echo "<ul class='list-group'>";
+                foreach($proximas as $t):
+                    echo "<li class='list-group-item'><strong>{$t['titulo']}</strong> - {$t['curso']} - Entrega: {$t['fecha_entrega']}</li>";
+                endforeach;
+                echo "</ul>";
+                ?>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Últimas entregas de tareas</div>
+            <div class="card-body">
+                <?php
+                $ultimasEntregas = $pdo->query("
+                    SELECT e.fecha_entrega, u.nombre as estudiante, t.titulo as tarea
+                    FROM entregas e
+                    JOIN usuarios u ON e.estudiante_id = u.id
+                    JOIN tareas t ON e.tarea_id = t.id
+                    ORDER BY e.fecha_entrega DESC LIMIT 5
+                ")->fetchAll();
+                if (empty($ultimasEntregas)) echo "<p>Aún no hay entregas.</p>";
+                else echo "<ul class='list-group'>";
+                foreach($ultimasEntregas as $e):
+                    echo "<li class='list-group-item'>{$e['estudiante']} entregó '{$e['tarea']}' el {$e['fecha_entrega']}</li>";
+                endforeach;
+                echo "</ul>";
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Gráfico de usuarios por rol

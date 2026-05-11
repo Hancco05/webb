@@ -33,6 +33,9 @@ $tareas = obtenerTareasPorCurso($curso_id);
                         $entrega = obtenerEntregaEstudiante($t['id'], $user_id);
                         $estado = $entrega ? 'Entregada' : 'Pendiente';
                         $clase = $entrega ? 'success' : 'warning';
+                        $fecha_vencimiento = new DateTime($t['fecha_entrega']);
+                        $hoy = new DateTime();
+                        $estado_extra = ($fecha_vencimiento < $hoy && !$entrega) ? '<span class="badge bg-danger">Vencida</span>' : '';
                     ?>
                     <tr>
                         <td><?= htmlspecialchars($t['titulo']) ?></td>
