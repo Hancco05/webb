@@ -26,18 +26,26 @@ $tareas = obtenerTareasPorCurso($curso_id);
         <?php else: ?>
             <table class="table table-bordered">
                 <thead>
-                    <tr><th>Título</th><th>Asignatura</th><th>Fecha entrega</th><th>Descripción</th></tr>
+                    <tr><th>Título</th><th>Asignatura</th><th>Fecha entrega</th><th>Descripción</th><th>Estado</th></tr>
                 </thead>
                 <tbody>
-                    <?php foreach($tareas as $t): ?>
+                    <?php foreach($tareas as $t): 
+                        $entrega = obtenerEntregaEstudiante($t['id'], $user_id);
+                        $estado = $entrega ? 'Entregada' : 'Pendiente';
+                        $clase = $entrega ? 'success' : 'warning';
+                    ?>
                     <tr>
                         <td><?= htmlspecialchars($t['titulo']) ?></td>
                         <td><?= htmlspecialchars($t['asignatura_nombre']) ?></td>
-                        <th>Acción</th>
-...
-<td><a href="entregar_tarea.php?id=<?= $t['id'] ?>" class="btn btn-sm btn-primary">Entregar</a></td>
                         <td><?= $t['fecha_entrega'] ?></td>
                         <td><?= nl2br(htmlspecialchars($t['descripcion'])) ?></td>
+                        <td class="text-<?= $clase ?>"><?= $estado ?>
+                            <?php if (!$entrega): ?>
+                                <a href="subir_entrega.php?tarea_id=<?= $t['id'] ?>" class="btn btn-sm btn-primary mt-1">Subir entrega</a>
+                            <?php else: ?>
+                                <a href="../uploads/entregas/<?= $entrega['archivo_ruta'] ?>" class="btn btn-sm btn-info mt-1" target="_blank">Ver mi entrega</a>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

@@ -119,6 +119,47 @@ function eliminarHorario($id) {
     return $stmt->execute([$id]);
 }
 
+// ========== FUNCIONES PARA ENTREGAS ==========
+function obtenerEntregasPorTarea($tarea_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT e.*, u.nombre as estudiante_nombre 
+        FROM entregas e
+        JOIN usuarios u ON e.estudiante_id = u.id
+        WHERE e.tarea_id = ?
+        ORDER BY e.fecha_entrega DESC
+    ");
+    $stmt->execute([$tarea_id]);
+    return $stmt->fetchAll();
+}
+
+function obtenerEntregaEstudiante($tarea_id, $estudiante_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM entregas WHERE tarea_id = ? AND estudiante_id = ?");
+    $stmt->execute([$tarea_id, $estudiante_id]);
+    return $stmt->fetch();
+}
+
+function registrarEntrega($tarea_id, $estudiante_id, $archivo_nombre, $archivo_ruta, $comentario = null) {
+    global $pdo;
+    // Verificar si ya existe entrega
+    $existe = obtenerEntregaEstudiante($tarea_id, $estudiante_id);
+    if ($existe) {
+        // Actualizar archivo y comentario
+        $stmt = $pdo->prepare("UPDATE entregas SET archivo_nombre=?, archivo_ruta=?, comentario=?, fecha_entrega=NOW() WHERE tarea_id=? AND estudiante_id=?");
+        return $stmt->execute([$archivo_nombre, $archivo_ruta, $comentario, $tarea_id, $estudiante_id]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO entregas (tarea_id, estudiante_id, archivo_nombre, archivo_ruta, comentario) VALUES (?,?,?,?,?)");
+        return $stmt->execute([$tarea_id, $estudiante_id, $archivo_nombre, $archivo_ruta, $comentario]);
+    }
+}
+
+function calificarEntrega($entrega_id, $calificacion, $comentario_profesor = null) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE entregas SET calificacion = ?, comentario_profesor = ? WHERE id = ?");
+    return $stmt->execute([$calificacion, $comentario_profesor, $entrega_id]);
+}
+
 // ========== FUNCIONES CSRF ==========
 function generarTokenCSRF() {
     if (empty($_SESSION['csrf_token'])) {
