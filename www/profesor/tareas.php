@@ -91,6 +91,15 @@ $tareas = obtenerTareasPorProfesor($profesor_id);
                                 <td><?= htmlspecialchars($t['asignatura_nombre']) ?></td>
                                 <th>Acción</th>
                                 ...
+                                <td>
+                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalEntregas<?= $t['id'] ?>">Ver entregas</button>
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar" onclick="editarTarea(<?= htmlspecialchars(json_encode($t)) ?>)">Editar</button>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar?')">
+                                        <input type="hidden" name="action" value="eliminar">
+                                        <input type="hidden" name="id" value="<?= $t['id'] ?>">
+                                        <button class="btn btn-danger btn-sm">Eliminar</button>
+                                    </form>
+                                </td>
                                 <td><a href="ver_entregas.php?id=<?= $t['id'] ?>" class="btn btn-sm btn-info">Ver entregas</a></td>
                                 <td><?= $t['fecha_entrega'] ?></td>
                                 <td>
