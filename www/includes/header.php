@@ -8,6 +8,8 @@ $rol = $_SESSION['rol'];
 $nombre = $_SESSION['nombre'];
 $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
 ?>
+<?php $notis_no_leidas = $pdo->prepare("SELECT COUNT(*) FROM notificaciones WHERE usuario_id = ? AND leido = 0"); $notis_no_leidas->execute([$_SESSION['user_id']]); $contarNotis = $notis_no_leidas->fetchColumn(); ?>
+<a href="../shared/mensajes.php#notificaciones" class="me-2"><i class="bi bi-bell"></i> <?php if($contarNotis > 0) echo "<span class='badge bg-danger'>$contarNotis</span>"; ?></a>
 <!DOCTYPE html>
 <html lang="es">
 <head>
