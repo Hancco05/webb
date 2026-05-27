@@ -342,4 +342,103 @@ function enviarCorreo($destinatario, $asunto, $cuerpoHtml, $cuerpoTexto = '') {
         return false;
     }
 }
+
+// ========== MENSAJERÍA ==========
+function enviarMensaje($remitente_id, $destinatario_id, $asunto, $mensaje) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO mensajes (remitente_id, destinatario_id, asunto, mensaje) VALUES (?,?,?,?)");
+    $result = $stmt->execute([$remitente_id, $destinatario_id, $asunto, $mensaje]);
+    if ($result) {
+        // Crear notificación para el destinatario
+        crearNotificacion($destinatario_id, "Nuevo mensaje de " . obtenerNombreUsuario($remitente_id), "Asunto: $asunto", "mensajes.php");
+    }
+    return $result;
+}
+
+function obtenerNombreUsuario($user_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT nombre FROM usuarios WHERE id = ?");
+    $stmt->execute([$user_id]);
+    return $stmt->fetchColumn();
+}
+
+function obtenerMensajesRecibidos($user_id, $limite = 20, $offset = 0) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, u.nombre as remitente_nombre 
+        FROM mensajes m
+        JOIN usuarios u ON m.remitente_id = u.id
+        WHERE m.destinatario_id = ?
+        ORDER BY m.fecha_envio DESC
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limite, PDO::PARAM_INT);
+    $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+function obtenerMensajesEnviados($user_id, $limite = 20, $offset = 0) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, u.nombre as destinatario_nombre 
+        FROM mensajes m
+        JOIN usuarios u ON m.destinatario_id = u.id
+        WHERE m.remitente_id = ?
+        ORDER BY m.fecha_envio DESC
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limite, PDO::PARAM_INT);
+    $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+function marcarMensajeLeido($mensaje_id, $user_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE mensajes SET leido = 1 WHERE id = ? AND destinatario_id = ?");
+    return $stmt->execute([$mensaje_id, $user_id]);
+}
+
+function obtenerMensaje($mensaje_id, $user_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, u.nombre as remitente_nombre 
+        FROM mensajes m
+        JOIN usuarios u ON m.remitente_id = u.id
+        WHERE m.id = ? AND (m.remitente_id = ? OR m.destinatario_id = ?)
+    ");
+    $stmt->execute([$mensaje_id, $user_id, $user_id]);
+    return $stmt->fetch();
+}
+
+function contarMensajesNoLeidos($user_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE destinatario_id = ? AND leido = 0");
+    $stmt->execute([$user_id]);
+    return $stmt->fetchColumn();
+}
+
+function crearNotificacion($usuario_id, $titulo, $mensaje, $link = null) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO notificaciones (usuario_id, titulo, mensaje, link) VALUES (?,?,?,?)");
+    return $stmt->execute([$usuario_id, $titulo, $mensaje, $link]);
+}
+
+function obtenerNotificaciones($usuario_id, $limite = 10) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM notificaciones WHERE usuario_id = ? ORDER BY created_at DESC LIMIT ?");
+    $stmt->bindValue(1, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limite, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+function marcarNotificacionLeida($notificacion_id, $usuario_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE notificaciones SET leido = 1 WHERE id = ? AND usuario_id = ?");
+    return $stmt->execute([$notificacion_id, $usuario_id]);
+}
 ?>
