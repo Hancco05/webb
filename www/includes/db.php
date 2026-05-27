@@ -441,4 +441,46 @@ function marcarNotificacionLeida($notificacion_id, $usuario_id) {
     $stmt = $pdo->prepare("UPDATE notificaciones SET leido = 1 WHERE id = ? AND usuario_id = ?");
     return $stmt->execute([$notificacion_id, $usuario_id]);
 }
+
+// ========== CALENDARIO ==========
+function obtenerEventos($fecha_inicio = null, $fecha_fin = null, $curso_id = null) {
+    global $pdo;
+    $sql = "SELECT e.*, c.nombre as curso_nombre, a.nombre as asignatura_nombre 
+            FROM eventos e
+            LEFT JOIN cursos c ON e.curso_id = c.id
+            LEFT JOIN asignaturas a ON e.asignatura_id = a.id
+            WHERE 1=1";
+    $params = [];
+    if ($fecha_inicio && $fecha_fin) {
+        $sql .= " AND e.fecha_inicio >= ? AND e.fecha_fin <= ?";
+        $params[] = $fecha_inicio;
+        $params[] = $fecha_fin;
+    }
+    if ($curso_id) {
+        $sql .= " AND (e.curso_id = ? OR e.curso_id IS NULL)";
+        $params[] = $curso_id;
+    }
+    $sql .= " ORDER BY e.fecha_inicio ASC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+function crearEvento($titulo, $descripcion, $fecha_inicio, $fecha_fin, $hora_inicio, $hora_fin, $tipo, $curso_id, $asignatura_id, $creado_por) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO eventos (titulo, descripcion, fecha_inicio, fecha_fin, hora_inicio, hora_fin, tipo, curso_id, asignatura_id, creado_por) VALUES (?,?,?,?,?,?,?,?,?,?)");
+    return $stmt->execute([$titulo, $descripcion, $fecha_inicio, $fecha_fin, $hora_inicio, $hora_fin, $tipo, $curso_id, $asignatura_id, $creado_por]);
+}
+
+function actualizarEvento($id, $titulo, $descripcion, $fecha_inicio, $fecha_fin, $hora_inicio, $hora_fin, $tipo, $curso_id, $asignatura_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE eventos SET titulo=?, descripcion=?, fecha_inicio=?, fecha_fin=?, hora_inicio=?, hora_fin=?, tipo=?, curso_id=?, asignatura_id=? WHERE id=?");
+    return $stmt->execute([$titulo, $descripcion, $fecha_inicio, $fecha_fin, $hora_inicio, $hora_fin, $tipo, $curso_id, $asignatura_id, $id]);
+}
+
+function eliminarEvento($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM eventos WHERE id=?");
+    return $stmt->execute([$id]);
+}
 ?>
