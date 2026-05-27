@@ -38,6 +38,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                         <li class="nav-item"><a href="noticias.php" class="nav-link text-white"><i class="bi bi-newspaper"></i> Noticias</a></li>
                         <li class="nav-item"><a href="logs.php" class="nav-link text-white"><i class="bi bi-journal-text"></i> Registro de actividades</a></li>
                         <li class="nav-item"><a href="reportes.php" class="nav-link text-white"><i class="bi bi-file-earmark-pdf"></i> Reportes</a></li>
+                        <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php elseif ($rol == 'profesor'): ?>
                         <li class="nav-item"><a href="mis_cursos.php" class="nav-link text-white"><i class="bi bi-book"></i> Mis Cursos</a></li>
                         <li class="nav-item"><a href="notas.php" class="nav-link text-white"><i class="bi bi-pencil-square"></i> Notas</a></li>
@@ -45,12 +46,15 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                         <li class="nav-item"><a href="horarios.php" class="nav-link text-white"><i class="bi bi-clock"></i> Horarios</a></li>
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Asistencia</a></li>
                         <li class="nav-item"><a href="reportes.php" class="nav-link text-white"><i class="bi bi-file-earmark-pdf"></i> Reportes</a></li>
+                        <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php elseif ($rol == 'auxiliar'): ?>
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Asistencia</a></li>
+                        <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php elseif ($rol == 'estudiante'): ?>
                         <li class="nav-item"><a href="mis_notas.php" class="nav-link text-white"><i class="bi bi-pencil-square"></i> Mis Notas</a></li>
                         <li class="nav-item"><a href="horarios.php" class="nav-link text-white"><i class="bi bi-clock"></i> Mi Horario</a></li>
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Mi Asistencia</a></li>
+                        <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php elseif ($rol == 'apoderado'): ?>
                         <li class="nav-item"><a href="hijos.php" class="nav-link text-white"><i class="bi bi-person-badge"></i> Mis Hijos</a></li>
                         <li class="nav-item"><a href="notas.php" class="nav-link text-white"><i class="bi bi-pencil-square"></i> Notas de Hijos</a></li>
@@ -58,10 +62,12 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                         <li class="nav-item"><a href="noticias.php" class="nav-link text-white"><i class="bi bi-newspaper"></i> Noticias</a></li>
                         <li class="nav-item"><a href="recordatorios.php" class="nav-link text-white"><i class="bi bi-bell"></i> Recordatorios</a></li>
                         <li class="nav-item"><a href="reportes.php" class="nav-link text-white"><i class="bi bi-file-earmark-pdf"></i> Reportes</a></li>
+                        <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php endif; ?>
                     <li class="nav-item"><a href="../shared/perfil.php" class="nav-link text-white"><i class="bi bi-person-circle"></i> Mi Perfil</a></li>
                     <li class="nav-item"><a href="../shared/cambiar_password.php" class="nav-link text-white"><i class="bi bi-key"></i> Cambiar Contraseña</a></li>
                     <li class="nav-item"><a href="../logout.php" class="nav-link text-white"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                    
                 </ul>
             </nav>
 
@@ -70,3 +76,13 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                     <h1 class="h2"><?php echo $titulo_pagina; ?></h1>
                     <span class="badge bg-secondary"><?php echo ucfirst($rol); ?>: <?php echo htmlspecialchars($nombre); ?></span>
                 </div>
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><?php echo $titulo_pagina; ?></h1>
+                        <div>
+                            <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary me-2">
+                                <i class="bi bi-moon"></i> Modo oscuro
+                            </button>
+                            <span class="badge bg-secondary"><?php echo ucfirst($rol); ?>: <?php echo htmlspecialchars($nombre); ?></span>
+                        </div>
+                </div>
+            
