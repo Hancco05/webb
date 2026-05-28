@@ -483,4 +483,41 @@ function eliminarEvento($id) {
     $stmt = $pdo->prepare("DELETE FROM eventos WHERE id=?");
     return $stmt->execute([$id]);
 }
+
+// ========== EVALUACIONES (CUESTIONARIOS) ==========
+function obtenerCuestionariosPorCurso($curso_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT c.*, a.nombre as asignatura_nombre, u.nombre as profesor_nombre
+        FROM cuestionarios c
+        JOIN asignaturas a ON c.asignatura_id = a.id
+        JOIN usuarios u ON c.profesor_id = u.id
+        WHERE c.curso_id = ? AND c.fecha_fin >= NOW()
+        ORDER BY c.fecha_inicio
+    ");
+    $stmt->execute([$curso_id]);
+    return $stmt->fetchAll();
+}
+
+function obtenerCuestionariosPorProfesor($profesor_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT c.*, a.nombre as asignatura_nombre, cur.nombre as curso_nombre
+        FROM cuestionarios c
+        JOIN asignaturas a ON c.asignatura_id = a.id
+        JOIN cursos cur ON c.curso_id = cur.id
+        WHERE c.profesor_id = ?
+        ORDER BY c.created_at DESC
+    ");
+    $stmt->execute([$profesor_id]);
+    return $stmt->fetchAll();
+}
+
+function crearCuestionario($titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO cuestionarios (titulo, descripcion, asignatura_id, curso_id, profesor_id, fecha_inicio, fecha_fin, tiempo_limite, intentos_permitidos) VALUES (?,?,?,?,?,?,?,?,?)");
+    return $stmt->execute([$titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos]);
+}
+
+// Funciones para preguntas y opciones, etc. (las iremos agregando según necesitemos)
 ?>
