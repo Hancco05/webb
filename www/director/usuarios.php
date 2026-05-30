@@ -5,79 +5,73 @@ require_once '../includes/db.php';
 $titulo_pagina = 'Gestión de Usuarios';
 include '../includes/header.php';
 
-// Procesar acciones (crear, editar, eliminar)
+// Procesar acciones
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verificarTokenCSRF($_POST['csrf_token'])) { die("CSRF inválido"); }
-    
-    $action = $_POST['action'] ?? '';
-    if ($action === 'crear') {
-        $nombre = $_POST['nombre'];
-        $email = $_POST['email'];
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $rol = $_POST['rol'];
-        $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?,?,?,?)");
-        if ($stmt->execute([$nombre, $email, $password, $rol])) {
-            // Enviar correo de bienvenida (opcional)
-            $cuerpo = "<h1>Bienvenido/a</h1><p>Su cuenta ha sido creada. Usuario: $email, Contraseña: {$_POST['password']}</p>";
-            enviarCorreo($email, 'Bienvenido al sistema', $cuerpo);
-            $_SESSION['mensaje'] = "Usuario creado y notificado";
-        } else {
-            $_SESSION['mensaje'] = "Error al crear usuario";
+    if (isset($_POST['action'])) {
+        switch ($_POST['action']) {
+            case 'crear':
+                $nombre = $_POST['nombre'];
+                $email = $_POST['email'];
+                $password = $_POST['password'];
+                $rol = $_POST['rol'];
+                // Validar contraseña fuerte
+                if (!validarPassword($password)) {
+                    $_SESSION['mensaje'] = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.";
+                    break;
+                }
+                $password_hash = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?,?,?,?)");
+                if ($stmt->execute([$nombre, $email, $password_hash, $rol])) {
+                    $nuevo_id = $pdo->lastInsertId();
+                    registrarLog($_SESSION['user_id'], 'crear', 'usuarios', $nuevo_id, "Usuario: $nombre, email: $email, rol: $rol");
+                    // Enviar correo de bienvenida (opcional)
+                    $cuerpo = "<h1>Bienvenido al sistema educativo</h1><p>Hola $nombre, tu cuenta ha sido creada.</p><p>Email: $email</p><p>Contraseña temporal: $password</p><p>Rol: $rol</p><p>Ingresa al sistema: <a href='http://localhost:8080'>http://localhost:8080</a></p>";
+                    enviarCorreo($email, 'Tu cuenta ha sido creada', $cuerpo);
+                    $_SESSION['mensaje'] = "Usuario creado y notificado.";
+                } else {
+                    $_SESSION['mensaje'] = "Error al crear usuario.";
+                }
+                break;
+            case 'editar':
+                $id = $_POST['id'];
+                $nombre = $_POST['nombre'];
+                $email = $_POST['email'];
+                $rol = $_POST['rol'];
+                $password = $_POST['password'] ?? '';
+                $stmt = $pdo->prepare("UPDATE usuarios SET nombre=?, email=?, rol=? WHERE id=?");
+                $stmt->execute([$nombre, $email, $rol, $id]);
+                if (!empty($password)) {
+                    if (!validarPassword($password)) {
+                        $_SESSION['mensaje'] = "La nueva contraseña no cumple los requisitos mínimos.";
+                        break;
+                    }
+                    $password_hash = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt2 = $pdo->prepare("UPDATE usuarios SET password_hash=? WHERE id=?");
+                    $stmt2->execute([$password_hash, $id]);
+                }
+                registrarLog($_SESSION['user_id'], 'editar', 'usuarios', $id, "Usuario ID $id actualizado");
+                $_SESSION['mensaje'] = "Usuario actualizado";
+                break;
+            case 'eliminar':
+                $id = $_POST['id'];
+                $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id=?");
+                $stmt->execute([$id]);
+                registrarLog($_SESSION['user_id'], 'eliminar', 'usuarios', $id, "Usuario ID $id eliminado");
+                $_SESSION['mensaje'] = "Usuario eliminado";
+                break;
         }
-        header("Location: usuarios.php");
-        exit;
-    } elseif ($action === 'editar') {
-        $id = $_POST['id'];
-        $nombre = $_POST['nombre'];
-        $email = $_POST['email'];
-        $rol = $_POST['rol'];
-        $stmt = $pdo->prepare("UPDATE usuarios SET nombre=?, email=?, rol=? WHERE id=?");
-        $stmt->execute([$nombre, $email, $rol, $id]);
-        if (!empty($_POST['password'])) {
-            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("UPDATE usuarios SET password_hash=? WHERE id=?");
-            $stmt->execute([$password, $id]);
-        }
-        $_SESSION['mensaje'] = "Usuario actualizado";
-        header("Location: usuarios.php");
-        exit;
-    } elseif ($action === 'eliminar') {
-        $id = $_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id=?");
-        $stmt->execute([$id]);
-        $_SESSION['mensaje'] = "Usuario eliminado";
         header("Location: usuarios.php");
         exit;
     }
-}
-
-// Después de crear usuario
-if ($stmt->execute([$nombre, $email, $password, $rol])) {
-    $nuevo_id = $pdo->lastInsertId();
-    registrarLog($_SESSION['user_id'], 'crear', 'usuarios', $nuevo_id, "Usuario: $nombre, email: $email, rol: $rol");
-    $_SESSION['mensaje'] = "Usuario creado y notificado por correo.";
-}
-
-// Después de editar
-if ($stmt->execute([$nombre, $email, $rol, $id])) {
-    registrarLog($_SESSION['user_id'], 'editar', 'usuarios', $id, "Usuario ID $id: nuevos datos nombre=$nombre, email=$email, rol=$rol");
-    $_SESSION['mensaje'] = "Usuario actualizado";
-}
-
-// Después de eliminar
-if ($stmt->execute([$id])) {
-    registrarLog($_SESSION['user_id'], 'eliminar', 'usuarios', $id, "Usuario ID $id eliminado");
-    $_SESSION['mensaje'] = "Usuario eliminado";
 }
 
 // Paginación
 $limite = 10;
 $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $offset = ($pagina - 1) * $limite;
-
 $total = $pdo->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
 $totalPaginas = ceil($total / $limite);
-
 $stmt = $pdo->prepare("SELECT * FROM usuarios ORDER BY created_at DESC LIMIT :offset, :limite");
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
@@ -94,7 +88,7 @@ $usuarios = $stmt->fetchAll();
             <div class="alert alert-success"><?= $_SESSION['mensaje']; unset($_SESSION['mensaje']); ?></div>
         <?php endif; ?>
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered">
                 <thead>
                     <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr>
                 </thead>
@@ -114,15 +108,14 @@ $usuarios = $stmt->fetchAll();
                                 <input type="hidden" name="id" value="<?= $u['id'] ?>">
                                 <button class="btn btn-danger btn-sm">Eliminar</button>
                             </form>
-                        </td>
+                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-        <!-- Paginación -->
         <nav>
-            <ul class="pagination justify-content-center">
+            <ul class="pagination">
                 <?php if ($pagina > 1): ?>
                     <li class="page-item"><a class="page-link" href="?pagina=<?= $pagina-1 ?>">Anterior</a></li>
                 <?php endif; ?>
@@ -139,7 +132,7 @@ $usuarios = $stmt->fetchAll();
     </div>
 </div>
 
-<!-- Modal para crear/editar usuario (igual que antes) -->
+<!-- Modal para crear/editar -->
 <div class="modal fade" id="modalUsuario" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
@@ -162,7 +155,7 @@ $usuarios = $stmt->fetchAll();
                 <div class="mb-2">
                     <label>Contraseña</label>
                     <input type="password" name="password" id="password" class="form-control">
-                    <small class="text-muted">Dejar en blanco para no cambiar</small>
+                    <small class="text-muted">Mínimo 8 caracteres, mayúscula, minúscula y número. Dejar en blanco para no cambiar (solo edición).</small>
                 </div>
                 <div class="mb-2">
                     <label>Rol</label>
@@ -189,6 +182,7 @@ function resetForm() {
     document.getElementById('nombre').value = '';
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
+    document.getElementById('password').required = true;
     document.getElementById('rol').value = 'estudiante';
 }
 function editarUsuario(user) {
@@ -197,60 +191,8 @@ function editarUsuario(user) {
     document.getElementById('nombre').value = user.nombre;
     document.getElementById('email').value = user.email;
     document.getElementById('password').value = '';
+    document.getElementById('password').required = false;
     document.getElementById('rol').value = user.rol;
 }
-
-// ========== FUNCIONES PARA LOGS ==========
-function registrarLog($usuario_id, $accion, $tabla_afectada = null, $registro_id = null, $detalles = null) {
-    global $pdo;
-    // Obtener datos del usuario si no se pasan
-    $usuario = obtenerDatosUsuario($usuario_id);
-    $nombre = $usuario['nombre'];
-    $rol = $usuario['rol'];
-    
-    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
-    
-    $stmt = $pdo->prepare("INSERT INTO logs (usuario_id, usuario_nombre, usuario_rol, accion, tabla_afectada, registro_id, detalles, ip_address, user_agent) VALUES (?,?,?,?,?,?,?,?,?)");
-    return $stmt->execute([$usuario_id, $nombre, $rol, $accion, $tabla_afectada, $registro_id, $detalles, $ip, $user_agent]);
-}
-
-function obtenerLogs($limite = 50, $offset = 0, $filtro_usuario = null, $filtro_accion = null) {
-    global $pdo;
-    $sql = "SELECT * FROM logs WHERE 1=1";
-    $params = [];
-    if ($filtro_usuario) {
-        $sql .= " AND usuario_id = ?";
-        $params[] = $filtro_usuario;
-    }
-    if ($filtro_accion) {
-        $sql .= " AND accion = ?";
-        $params[] = $filtro_accion;
-    }
-    $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limite;
-    $params[] = $offset;
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchAll();
-}
-
-function contarLogs($filtro_usuario = null, $filtro_accion = null) {
-    global $pdo;
-    $sql = "SELECT COUNT(*) FROM logs WHERE 1=1";
-    $params = [];
-    if ($filtro_usuario) {
-        $sql .= " AND usuario_id = ?";
-        $params[] = $filtro_usuario;
-    }
-    if ($filtro_accion) {
-        $sql .= " AND accion = ?";
-        $params[] = $filtro_accion;
-    }
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchColumn();
-}
-
 </script>
 <?php include '../includes/footer.php'; ?>

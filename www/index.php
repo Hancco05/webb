@@ -24,7 +24,13 @@ $_SESSION['captcha'] = $num1 + $num2;
                     </div>
                     <div class="card-body">
                         <?php if (isset($_GET['error'])): ?>
-                            <div class="alert alert-danger">Credenciales incorrectas.</div>
+                            <?php if ($_GET['error'] == 'captcha'): ?>
+                                <div class="alert alert-danger">Código de verificación incorrecto.</div>
+                            <?php elseif ($_GET['error'] == 'bloqueado'): ?>
+                                <div class="alert alert-danger">Demasiados intentos. Cuenta bloqueada 15 minutos.</div>
+                            <?php else: ?>
+                                <div class="alert alert-danger">Credenciales incorrectas.</div>
+                            <?php endif; ?>
                         <?php endif; ?>
                         <form action="includes/auth.php" method="POST">
                             <div class="mb-3">

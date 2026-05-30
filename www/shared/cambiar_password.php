@@ -14,19 +14,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmar = $_POST['confirmar'];
     $user_id = $_SESSION['user_id'];
     $usuario = obtenerDatosUsuario($user_id);
-    if (password_verify($actual, $usuario['password_hash'])) {
-        if ($nueva === $confirmar) {
-            $hash = password_hash($nueva, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("UPDATE usuarios SET password_hash=? WHERE id=?");
-            $stmt->execute([$hash, $user_id]);
-            $_SESSION['mensaje'] = "Contraseña actualizada";
-            header("Location: cambiar_password.php");
-            exit;
-        } else {
-            $error = "Las nuevas contraseñas no coinciden";
-        }
-    } else {
+    
+    if (!password_verify($actual, $usuario['password_hash'])) {
         $error = "Contraseña actual incorrecta";
+    } elseif ($nueva !== $confirmar) {
+        $error = "Las nuevas contraseñas no coinciden";
+    } elseif (!validarPassword($nueva)) {
+        $error = "La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.";
+    } else {
+        $hash = password_hash($nueva, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE usuarios SET password_hash=? WHERE id=?");
+        $stmt->execute([$hash, $user_id]);
+        registrarLog($user_id, 'cambiar_password', 'usuarios', $user_id, "Cambio de contraseña");
+        $_SESSION['mensaje'] = "Contraseña actualizada correctamente.";
+        header("Location: cambiar_password.php");
+        exit;
     }
 }
 ?>
@@ -47,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
                 <label>Nueva contraseña</label>
                 <input type="password" name="nueva" class="form-control" required>
+                <small class="text-muted">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</small>
             </div>
             <div class="mb-3">
                 <label>Confirmar nueva contraseña</label>

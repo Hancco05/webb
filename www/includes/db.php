@@ -726,4 +726,9 @@ function limpiarIntentosExitosos($email) {
     $stmt = $pdo->prepare("DELETE FROM intentos_login WHERE email = ?");
     return $stmt->execute([$email]);
 }
+
+function validarPassword($password) {
+    // Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número
+    return preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password);
+}
 ?>

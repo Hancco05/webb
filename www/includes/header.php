@@ -1,5 +1,11 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit;
