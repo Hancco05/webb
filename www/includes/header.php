@@ -55,6 +55,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Asistencia</a></li>
                         <li class="nav-item"><a href="reportes.php" class="nav-link text-white"><i class="bi bi-file-earmark-pdf"></i> Reportes</a></li>
                         <li class="nav-item"><a href="../shared/calendario.php" class="nav-link text-white"><i class="bi bi-calendar"></i> Calendario</a></li>
+                        <li class="nav-item"><a href="cuestionarios.php" class="nav-link text-white"><i class="bi bi-question-circle"></i> Cuestionarios</a></li>
                         <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php elseif ($rol == 'auxiliar'): ?>
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Asistencia</a></li>
@@ -65,6 +66,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
                         <li class="nav-item"><a href="horarios.php" class="nav-link text-white"><i class="bi bi-clock"></i> Mi Horario</a></li>
                         <li class="nav-item"><a href="asistencia.php" class="nav-link text-white"><i class="bi bi-calendar-check"></i> Mi Asistencia</a></li>
                         <li class="nav-item"><a href="../shared/calendario.php" class="nav-link text-white"><i class="bi bi-calendar"></i> Calendario</a></li>
+                        <li class="nav-item"><a href="cuestionarios.php" class="nav-link text-white"><i class="bi bi-pencil-square"></i> Evaluaciones</a></li>
                         <li class="nav-item"><a href="../shared/mensajes.php" class="nav-link text-white"><i class="bi bi-envelope"></i> Mensajes <?php $noLeidos = contarMensajesNoLeidos($_SESSION['user_id']); if($noLeidos > 0) echo "<span class='badge bg-danger'>$noLeidos</span>"; ?></a></li>
                     <?php elseif ($rol == 'apoderado'): ?>
                         <li class="nav-item"><a href="hijos.php" class="nav-link text-white"><i class="bi bi-person-badge"></i> Mis Hijos</a></li>
