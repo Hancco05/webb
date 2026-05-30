@@ -518,6 +518,165 @@ function crearCuestionario($titulo, $descripcion, $asignatura_id, $curso_id, $pr
     $stmt = $pdo->prepare("INSERT INTO cuestionarios (titulo, descripcion, asignatura_id, curso_id, profesor_id, fecha_inicio, fecha_fin, tiempo_limite, intentos_permitidos) VALUES (?,?,?,?,?,?,?,?,?)");
     return $stmt->execute([$titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos]);
 }
-
 // Funciones para preguntas y opciones, etc. (las iremos agregando según necesitemos)
+
+// ========== EVALUACIONES (CUESTIONARIOS) ==========
+function obtenerCuestionariosPorCurso($curso_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT c.*, a.nombre as asignatura_nombre, u.nombre as profesor_nombre
+        FROM cuestionarios c
+        JOIN asignaturas a ON c.asignatura_id = a.id
+        JOIN usuarios u ON c.profesor_id = u.id
+        WHERE c.curso_id = ? AND c.fecha_fin >= NOW()
+        ORDER BY c.fecha_inicio
+    ");
+    $stmt->execute([$curso_id]);
+    return $stmt->fetchAll();
+}
+
+function obtenerCuestionariosPorProfesor($profesor_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT c.*, a.nombre as asignatura_nombre, cur.nombre as curso_nombre
+        FROM cuestionarios c
+        JOIN asignaturas a ON c.asignatura_id = a.id
+        JOIN cursos cur ON c.curso_id = cur.id
+        WHERE c.profesor_id = ?
+        ORDER BY c.created_at DESC
+    ");
+    $stmt->execute([$profesor_id]);
+    return $stmt->fetchAll();
+}
+
+function obtenerCuestionario($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM cuestionarios WHERE id = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+
+function crearCuestionario($titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO cuestionarios (titulo, descripcion, asignatura_id, curso_id, profesor_id, fecha_inicio, fecha_fin, tiempo_limite, intentos_permitidos) VALUES (?,?,?,?,?,?,?,?,?)");
+    return $stmt->execute([$titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos]);
+}
+
+function actualizarCuestionario($id, $titulo, $descripcion, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE cuestionarios SET titulo=?, descripcion=?, fecha_inicio=?, fecha_fin=?, tiempo_limite=?, intentos_permitidos=? WHERE id=?");
+    return $stmt->execute([$titulo, $descripcion, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos, $id]);
+}
+
+function eliminarCuestionario($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM cuestionarios WHERE id=?");
+    return $stmt->execute([$id]);
+}
+
+// ========== PREGUNTAS Y OPCIONES ==========
+function obtenerPreguntas($cuestionario_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM preguntas WHERE cuestionario_id = ? ORDER BY id");
+    $stmt->execute([$cuestionario_id]);
+    return $stmt->fetchAll();
+}
+
+function obtenerPregunta($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM preguntas WHERE id = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+
+function crearPregunta($cuestionario_id, $enunciado, $tipo, $puntos) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO preguntas (cuestionario_id, enunciado, tipo, puntos) VALUES (?,?,?,?)");
+    return $stmt->execute([$cuestionario_id, $enunciado, $tipo, $puntos]);
+}
+
+function actualizarPregunta($id, $enunciado, $tipo, $puntos) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE preguntas SET enunciado=?, tipo=?, puntos=? WHERE id=?");
+    return $stmt->execute([$enunciado, $tipo, $puntos, $id]);
+}
+
+function eliminarPregunta($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM preguntas WHERE id=?");
+    return $stmt->execute([$id]);
+}
+
+// Opciones
+function obtenerOpciones($pregunta_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM opciones WHERE pregunta_id = ? ORDER BY id");
+    $stmt->execute([$pregunta_id]);
+    return $stmt->fetchAll();
+}
+
+function crearOpcion($pregunta_id, $texto, $es_correcta) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO opciones (pregunta_id, texto, es_correcta) VALUES (?,?,?)");
+    return $stmt->execute([$pregunta_id, $texto, $es_correcta]);
+}
+
+function actualizarOpcion($id, $texto, $es_correcta) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE opciones SET texto=?, es_correcta=? WHERE id=?");
+    return $stmt->execute([$texto, $es_correcta, $id]);
+}
+
+function eliminarOpcion($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM opciones WHERE id=?");
+    return $stmt->execute([$id]);
+}
+
+// ========== RESPUESTAS Y CALIFICACIONES ==========
+function guardarRespuesta($cuestionario_id, $pregunta_id, $estudiante_id, $opcion_id, $respuesta_texto, $es_correcta) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO respuestas (cuestionario_id, pregunta_id, estudiante_id, opcion_id, respuesta_texto, es_correcta) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE opcion_id=?, respuesta_texto=?, es_correcta=?");
+    return $stmt->execute([$cuestionario_id, $pregunta_id, $estudiante_id, $opcion_id, $respuesta_texto, $es_correcta, $opcion_id, $respuesta_texto, $es_correcta]);
+}
+
+function calcularCalificacion($cuestionario_id, $estudiante_id) {
+    global $pdo;
+    // Obtener todas las preguntas y respuestas
+    $stmt = $pdo->prepare("
+        SELECT p.puntos, r.es_correcta
+        FROM preguntas p
+        LEFT JOIN respuestas r ON p.id = r.pregunta_id AND r.estudiante_id = ? AND r.cuestionario_id = ?
+        WHERE p.cuestionario_id = ?
+    ");
+    $stmt->execute([$estudiante_id, $cuestionario_id, $cuestionario_id]);
+    $rows = $stmt->fetchAll();
+    $puntaje_obtenido = 0;
+    $puntaje_total = 0;
+    foreach ($rows as $row) {
+        $puntaje_total += $row['puntos'];
+        if ($row['es_correcta']) {
+            $puntaje_obtenido += $row['puntos'];
+        }
+    }
+    // Guardar calificación
+    $stmt2 = $pdo->prepare("INSERT INTO calificaciones (cuestionario_id, estudiante_id, puntaje_obtenido, puntaje_total) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE puntaje_obtenido=?, puntaje_total=?, intentos=intentos+1, fecha_calificacion=NOW()");
+    $stmt2->execute([$cuestionario_id, $estudiante_id, $puntaje_obtenido, $puntaje_total, $puntaje_obtenido, $puntaje_total]);
+    return ['obtenido' => $puntaje_obtenido, 'total' => $puntaje_total, 'porcentaje' => ($puntaje_total > 0) ? ($puntaje_obtenido / $puntaje_total) * 100 : 0];
+}
+
+function obtenerCalificacionEstudiante($cuestionario_id, $estudiante_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM calificaciones WHERE cuestionario_id = ? AND estudiante_id = ?");
+    $stmt->execute([$cuestionario_id, $estudiante_id]);
+    return $stmt->fetch();
+}
+
+function obtenerRespuestasEstudiante($cuestionario_id, $estudiante_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT r.*, p.enunciado, p.puntos, o.texto as opcion_texto FROM respuestas r JOIN preguntas p ON r.pregunta_id = p.id LEFT JOIN opciones o ON r.opcion_id = o.id WHERE r.cuestionario_id = ? AND r.estudiante_id = ?");
+    $stmt->execute([$cuestionario_id, $estudiante_id]);
+    return $stmt->fetchAll();
+}
+
 ?>
