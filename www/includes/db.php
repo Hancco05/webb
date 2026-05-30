@@ -731,4 +731,101 @@ function validarPassword($password) {
     // Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número
     return preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password);
 }
+
+// ========== MENSAJERÍA INTERNA ==========
+function enviarMensaje($from_id, $to_id, $asunto, $mensaje, $parent_id = null) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO mensajes (from_user_id, to_user_id, asunto, mensaje, parent_id) VALUES (?,?,?,?,?)");
+    return $stmt->execute([$from_id, $to_id, $asunto, $mensaje, $parent_id]);
+}
+
+function obtenerMensajesRecibidos($user_id, $limite = 20, $offset = 0) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, u.nombre as remitente_nombre 
+        FROM mensajes m
+        JOIN usuarios u ON m.from_user_id = u.id
+        WHERE m.to_user_id = ?
+        ORDER BY m.created_at DESC
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limite, PDO::PARAM_INT);
+    $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+function obtenerMensajesEnviados($user_id, $limite = 20, $offset = 0) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, u.nombre as destinatario_nombre 
+        FROM mensajes m
+        JOIN usuarios u ON m.to_user_id = u.id
+        WHERE m.from_user_id = ?
+        ORDER BY m.created_at DESC
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limite, PDO::PARAM_INT);
+    $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+function contarMensajesNoLeidos($user_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE to_user_id = ? AND is_read = 0");
+    $stmt->execute([$user_id]);
+    return $stmt->fetchColumn();
+}
+
+function marcarMensajeComoLeido($mensaje_id, $user_id) {
+    global $pdo;
+    // Solo marcar si el destinatario es el usuario
+    $stmt = $pdo->prepare("UPDATE mensajes SET is_read = 1 WHERE id = ? AND to_user_id = ?");
+    return $stmt->execute([$mensaje_id, $user_id]);
+}
+
+function obtenerMensaje($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, 
+               u1.nombre as remitente_nombre, u1.rol as remitente_rol,
+               u2.nombre as destinatario_nombre, u2.rol as destinatario_rol
+        FROM mensajes m
+        JOIN usuarios u1 ON m.from_user_id = u1.id
+        JOIN usuarios u2 ON m.to_user_id = u2.id
+        WHERE m.id = ?
+    ");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+
+function obtenerRespuestas($parent_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT m.*, u.nombre as remitente_nombre 
+        FROM mensajes m
+        JOIN usuarios u ON m.from_user_id = u.id
+        WHERE m.parent_id = ?
+        ORDER BY m.created_at ASC
+    ");
+    $stmt->execute([$parent_id]);
+    return $stmt->fetchAll();
+}
+
+function buscarUsuarios($termino, $excluir_id = null) {
+    global $pdo;
+    $sql = "SELECT id, nombre, email, rol FROM usuarios WHERE nombre LIKE ? OR email LIKE ?";
+    $params = ["%$termino%", "%$termino%"];
+    if ($excluir_id) {
+        $sql .= " AND id != ?";
+        $params[] = $excluir_id;
+    }
+    $sql .= " LIMIT 10";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
 ?>
