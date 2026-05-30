@@ -679,4 +679,51 @@ function obtenerRespuestasEstudiante($cuestionario_id, $estudiante_id) {
     return $stmt->fetchAll();
 }
 
+function registrarIntentoLogin($email) {
+    global $pdo;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $stmt = $pdo->prepare("INSERT INTO login_attempts (email, ip_address) VALUES (?, ?)");
+    $stmt->execute([$email, $ip]);
+    // Eliminar intentos viejos (más de 15 minutos)
+    $pdo->prepare("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)")->execute();
+}
+
+function verificarBloqueo($email) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE email = ? AND attempt_time > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+    $stmt->execute([$email]);
+    $intentos = $stmt->fetchColumn();
+    return $intentos >= 5; // Bloquear después de 5 intentos fallidos en 15 min
+}
+
+function limpiarIntentosLogin($email) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ?");
+    $stmt->execute([$email]);
+}
+
+// ========== SEGURIDAD: INTENTOS DE LOGIN ==========
+function verificarIntentosFallidos($email, $ip, $limite = 5, $tiempo_bloqueo_minutos = 15) {
+    global $pdo;
+    $tiempo_limite = date('Y-m-d H:i:s', strtotime("-$tiempo_bloqueo_minutos minutes"));
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM intentos_login WHERE email = ? AND intento_time > ?");
+    $stmt->execute([$email, $tiempo_limite]);
+    $intentos = $stmt->fetchColumn();
+    if ($intentos >= $limite) {
+        return false; // Bloqueado
+    }
+    return true;
+}
+
+function registrarIntentoFallido($email, $ip) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO intentos_login (email, ip_address) VALUES (?, ?)");
+    return $stmt->execute([$email, $ip]);
+}
+
+function limpiarIntentosExitosos($email) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM intentos_login WHERE email = ?");
+    return $stmt->execute([$email]);
+}
 ?>

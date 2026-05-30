@@ -1,18 +1,11 @@
 <?php
 session_start();
-if (isset($_SESSION['user_id'])) {
-    $rol = $_SESSION['rol'];
-    switch ($rol) {
-        case 'director': header('Location: director/dashboard.php'); break;
-        case 'profesor': header('Location: profesor/dashboard.php'); break;
-        case 'auxiliar': header('Location: auxiliar/dashboard.php'); break;
-        case 'estudiante': header('Location: estudiante/dashboard.php'); break;
-        case 'apoderado': header('Location: apoderado/dashboard.php'); break;
-        default: header('Location: logout.php'); break;
-    }
-    exit;
-}
+// Generar captcha simple (suma)
+$num1 = rand(1, 10);
+$num2 = rand(1, 10);
+$_SESSION['captcha'] = $num1 + $num2;
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -41,6 +34,11 @@ if (isset($_SESSION['user_id'])) {
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
                                 <input type="password" class="form-control" name="password" required>
+                            </div>
+                            <!-- Dentro del formulario, antes del botón enviar -->
+                            <div class="mb-3">
+                                <label class="form-label">Captcha: ¿Cuánto es <?php echo $num1; ?> + <?php echo $num2; ?>?</label>
+                                <input type="number" name="captcha" class="form-control" required>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Ingresar</button>
                         </form>

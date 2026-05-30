@@ -5,12 +5,30 @@ require_once 'db.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
+    $captcha = $_POST['captcha'] ?? '';
+    $captcha_esperado = $_SESSION['captcha'] ?? '';
+
+    // Validar captcha
+    if ($captcha != $captcha_esperado) {
+        header('Location: ../index.php?error=captcha');
+        exit;
+    }
+
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+    // Verificar intentos fallidos
+    if (!verificarIntentosFallidos($email, $ip, 5, 15)) {
+        header('Location: ../index.php?error=bloqueado');
+        exit;
+    }
 
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password_hash'])) {
+        // Login exitoso: limpiar intentos
+        limpiarIntentosExitosos($email);
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['nombre'] = $user['nombre'];
         $_SESSION['rol'] = $user['rol'];
@@ -18,21 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Redirección según rol
         $rol = $user['rol'];
-        if ($rol === 'director') {
-            header('Location: ../director/dashboard.php');
-        } elseif ($rol === 'profesor') {
-            header('Location: ../profesor/dashboard.php');
-        } elseif ($rol === 'auxiliar') {
-            header('Location: ../auxiliar/dashboard.php');
-        } elseif ($rol === 'estudiante') {
-            header('Location: ../estudiante/dashboard.php');
-        } elseif ($rol === 'apoderado') {
-            header('Location: ../apoderado/dashboard.php');
-        } else {
-            header('Location: ../logout.php');
-        }
+        $redirect = [
+            'director' => '../director/dashboard.php',
+            'profesor' => '../profesor/dashboard.php',
+            'auxiliar' => '../auxiliar/dashboard.php',
+            'estudiante' => '../estudiante/dashboard.php',
+            'apoderado' => '../apoderado/dashboard.php',
+        ];
+        header('Location: ' . ($redirect[$rol] ?? '../logout.php'));
         exit;
     } else {
+        // Login fallido: registrar intento
+        registrarIntentoFallido($email, $ip);
         header('Location: ../index.php?error=1');
         exit;
     }
