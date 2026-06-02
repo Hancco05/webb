@@ -487,4 +487,5 @@ function obtenerRespuestasEstudiante($cuestionario_id, $estudiante_id) {
     $stmt->execute([$cuestionario_id, $estudiante_id]);
     return $stmt->fetchAll();
 }
+
 ?>
