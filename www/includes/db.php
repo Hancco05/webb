@@ -212,10 +212,15 @@ function obtenerLogs($limite = 50, $offset = 0, $filtro_usuario = null, $filtro_
     global $pdo;
     $sql = "SELECT * FROM logs WHERE 1=1";
     $params = [];
-    if ($filtro_usuario) { $sql .= " AND usuario_id = ?"; $params[] = $filtro_usuario; }
-    if ($filtro_accion) { $sql .= " AND accion = ?"; $params[] = $filtro_accion; }
-    $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limite; $params[] = $offset;
+    if ($filtro_usuario) {
+        $sql .= " AND usuario_id = ?";
+        $params[] = $filtro_usuario;
+    }
+    if ($filtro_accion) {
+        $sql .= " AND accion = ?";
+        $params[] = $filtro_accion;
+    }
+    $sql .= " ORDER BY created_at DESC LIMIT " . intval($limite) . " OFFSET " . intval($offset);
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
@@ -225,8 +230,14 @@ function contarLogs($filtro_usuario = null, $filtro_accion = null) {
     global $pdo;
     $sql = "SELECT COUNT(*) FROM logs WHERE 1=1";
     $params = [];
-    if ($filtro_usuario) { $sql .= " AND usuario_id = ?"; $params[] = $filtro_usuario; }
-    if ($filtro_accion) { $sql .= " AND accion = ?"; $params[] = $filtro_accion; }
+    if ($filtro_usuario) {
+        $sql .= " AND usuario_id = ?";
+        $params[] = $filtro_usuario;
+    }
+    if ($filtro_accion) {
+        $sql .= " AND accion = ?";
+        $params[] = $filtro_accion;
+    }
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchColumn();
