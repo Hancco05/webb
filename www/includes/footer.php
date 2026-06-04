@@ -18,7 +18,8 @@
         alert('<?php echo addslashes($_SESSION['mensaje']); ?>');
     </script>
     <?php unset($_SESSION['mensaje']); endif; ?>
-     <script>
+
+    <script>
     // Modo oscuro
     const themeToggle = document.getElementById('themeToggle');
     const currentTheme = localStorage.getItem('theme');
@@ -37,6 +38,5 @@
         }
     });
 </script>
-
 </body>
 </html>

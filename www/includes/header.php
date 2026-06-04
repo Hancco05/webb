@@ -108,6 +108,19 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
             margin: 0;
         }
     </style>
+    <script>
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        } else if (theme === 'light') {
+            document.documentElement.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Opcional: seguir la preferencia del sistema
+            document.documentElement.classList.add('dark-mode');
+        }
+    })();
+</script>
 </head>
 <body>
 <nav class="sidebar">

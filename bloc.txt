@@ -1,93 +1,84 @@
 webb/
 ├── docker-compose.yml
-├── php/
-│   └── Dockerfile
-├── mysql/
-│   └── init.sql
-├── www/
-│   ├── index.php
-│   ├── logout.php
-│   ├── includes/
-│   │   ├── db.php
-│   │   ├── auth.php
-│   │   ├── header.php
-│   │   └── footer.php
-│   ├── director/ (todos los .php)
-│   ├── profesor/ (todos los .php)
-│   ├── auxiliar/ (dashboard.php, asistencia.php)
-│   ├── estudiante/ (dashboard.php, mis_notas.php, asistencia.php)
-│   ├── apoderado/ (todos los .php)
-│   ├── shared/ (perfil.php, cambiar_password.php)
-│   └── ajax/ (asignaturas_por_curso.php)
-└── composer.json
-
-
-paso 2
-
-webb/
-└── www/
-    ├── director/
-    │   └── dashboard.php
-    ├── includes/
-    │   ├── db.php
-    │   ├── auth.php
-    │   ├── header.php   ← este debe existir
-    │   └── footer.php   ← este también
-    └── ..
-
-
-estructura de sistema ahora 
-
-webb/
-├── docker-compose.yml
 ├── composer.json
 ├── php/
 │   └── Dockerfile
 ├── mysql/
-│   └── init.sql (incluye tabla horarios)
-└── www/
-    ├── index.php
-    ├── logout.php
-    ├── includes/
-    │   ├── db.php (con funciones horarios + CSRF)
-    │   ├── auth.php
-    │   ├── header.php (sidebar con enlaces a horarios)
-    │   └── footer.php
-    ├── director/
-    │   ├── dashboard.php (con gráfico Chart.js)
-    │   ├── usuarios.php (con CSRF)
-    │   ├── cursos.php (con CSRF)
-    │   ├── asignaturas.php
-    │   ├── noticias.php
-    │   └── reportes.php
-    ├── profesor/
-    │   ├── dashboard.php
-    │   ├── mis_cursos.php
-    │   ├── notas.php
-    │   ├── asistencia.php
-    │   ├── reportes.php
-    │   └── horarios.php (nuevo, CRUD)
-    ├── auxiliar/
-    │   ├── dashboard.php
-    │   └── asistencia.php
-    ├── estudiante/
-    │   ├── dashboard.php
-    │   ├── mis_notas.php
-    │   ├── asistencia.php
-    │   └── horarios.php (nuevo, solo lectura)
-    ├── apoderado/
-    │   ├── dashboard.php
-    │   ├── hijos.php
-    │   ├── notas.php
-    │   ├── asistencia.php
-    │   ├── noticias.php
-    │   ├── recordatorios.php
-    │   ├── reportes.php
-    │   └── horarios.php (nuevo, por hijo)
-    ├── shared/
-    │   ├── perfil.php
-    │   └── cambiar_password.php
-    └── ajax/
-        └── asignaturas_por_curso.php
-
+│   └── init.sql                     (incluye todas las tablas: usuarios, cursos, horarios, tareas, entregas, cuestionarios, mensajes, logs, eventos, notificaciones, intentos_login, etc.)
+├── www/
+│   ├── index.php                    (login con captcha y control de intentos)
+│   ├── logout.php                   (destruye sesión y registra el logout)
+│   ├── assets/
+│   │   ├── css/
+│   │   │   └── custom.css           (estilos personalizados, modo oscuro)
+│   │   └── img/
+│   │       └── logo.png             (opcional)
+│   ├── uploads/
+│   │   └── entregas/                (archivos subidos por estudiantes)
+│   ├── includes/
+│   │   ├── db.php                   (conexión PDO + todas las funciones: horarios, tareas, entregas, mensajería, logs, eventos, cuestionarios, notificaciones, CSRF, intentos login, validarPassword, enviarCorreo)
+│   │   ├── auth.php                 (verifica sesión por rol, control de intentos de login, captcha)
+│   │   ├── header.php               (sidebar dinámico con modo oscuro vía PHP/sesión, enlaces absolutos)
+│   │   └── footer.php               (cierra main y body, incluye scripts JS básicos)
+│   ├── director/
+│   │   ├── dashboard.php            (gráficos con Chart.js, estadísticas, tareas próximas, últimas entregas)
+│   │   ├── usuarios.php             (CRUD completo + paginación + CSRF + validación contraseña)
+│   │   ├── cursos.php               (CRUD + paginación + CSRF)
+│   │   ├── asignaturas.php          (CRUD + CSRF)
+│   │   ├── noticias.php             (CRUD)
+│   │   ├── reportes.php             (PDF usuarios, cursos, tareas)
+│   │   ├── exportar_excel.php       (exporta CSV/Excel usuarios, cursos, tareas)
+│   │   ├── logs.php                 (visualización y filtros de auditoría)
+│   │   ├── enviar_recordatorio.php  (envío masivo a apoderados)
+│   │   ├── test_email.php           (prueba de envío de correo)
+│   │   ├── exportar_logs_excel.php  (exporta logs a CSV/Excel)
+│   │   └── estado_sistema.php       (muestra conteo de tablas y variables MySQL)
+│   ├── profesor/
+│   │   ├── dashboard.php
+│   │   ├── mis_cursos.php
+│   │   ├── notas.php
+│   │   ├── asistencia.php
+│   │   ├── reportes.php             (PDF notas, asistencia, tareas)
+│   │   ├── horarios.php             (CRUD horarios)
+│   │   ├── tareas.php               (CRUD tareas y visualización de entregas)
+│   │   ├── calificar_entrega.php    (procesa calificación)
+│   │   ├── cuestionarios.php        (lista cuestionarios creados)
+│   │   ├── crear_cuestionario.php
+│   │   ├── editar_preguntas.php     (añadir/editar preguntas y opciones)
+│   │   └── ver_calificaciones.php   (muestra calificaciones de estudiantes)
+│   ├── estudiante/
+│   │   ├── dashboard.php
+│   │   ├── mis_notas.php
+│   │   ├── asistencia.php
+│   │   ├── horarios.php             (solo lectura)
+│   │   ├── tareas.php               (lista tareas, botón subir entrega)
+│   │   ├── subir_entrega.php        (formulario upload)
+│   │   ├── cuestionarios.php        (lista evaluaciones disponibles)
+│   │   └── responder_cuestionario.php
+│   ├── apoderado/
+│   │   ├── dashboard.php
+│   │   ├── hijos.php                (selección de hijo)
+│   │   ├── notas.php                (notas del hijo seleccionado)
+│   │   ├── asistencia.php
+│   │   ├── horarios.php
+│   │   ├── tareas.php
+│   │   ├── noticias.php
+│   │   ├── recordatorios.php
+│   │   ├── reportes.php             (PDF notas/asistencia del hijo)
+│   │   └── (calendario se ve desde shared)
+│   ├── auxiliar/
+│   │   ├── dashboard.php
+│   │   └── asistencia.php           (registro por curso)
+│   ├── shared/
+│   │   ├── perfil.php               (edición de nombre/email)
+│   │   ├── cambiar_password.php     (con política de contraseña fuerte)
+│   │   ├── calendario.php           (integración FullCalendar, creación de eventos para director)
+│   │   ├── guardar_evento.php       (procesa formulario de evento)
+│   │   ├── mensajes.php             (bandeja de entrada/enviados)
+│   │   ├── enviar_mensaje.php       (formulario con búsqueda de usuarios)
+│   │   └── ver_mensaje.php          (detalle y respuestas)
+│   └── ajax/
+│       ├── asignaturas_por_curso.php
+│       └── buscar_usuarios.php      (para mensajería)
+└── vendor/                           (autogenerado por Composer, contiene dompdf, phpmailer, etc.)
 Proyecto finalizado!!
