@@ -7,120 +7,45 @@ if (!isset($_SESSION['user_id'])) {
 $rol = $_SESSION['rol'];
 $nombre = $_SESSION['nombre'];
 $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
+
+// Modo oscuro vía GET para cambiar y guardar en sesión
+if (isset($_GET['theme'])) {
+    $_SESSION['theme'] = $_GET['theme'] === 'dark' ? 'dark' : 'light';
+    $redirect = strtok($_SERVER['REQUEST_URI'], '?');
+    header("Location: $redirect");
+    exit;
+}
+$theme_class = (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'dark-mode' : '';
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="<?= $theme_class ?>">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($titulo_pagina); ?> - Sistema Educativo</title>
+    <title><?= htmlspecialchars($titulo_pagina) ?> - Sistema Educativo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* Estilos base (claro) */
-        body {
-            background-color: #f8f9fc;
-            color: #212529;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .sidebar {
-            background-color: #0a2b4e;
-            transition: background-color 0.3s;
-        }
-        .card {
-            background-color: #ffffff;
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
-        }
-        .table {
-            color: #212529;
-        }
-        /* Modo oscuro */
-        body.dark-mode {
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-        }
-        body.dark-mode .sidebar {
-            background-color: #0a0a15;
-        }
-        body.dark-mode .sidebar .nav-link {
-            color: #cccccc;
-        }
-        body.dark-mode .sidebar .nav-link:hover {
-            background-color: #1e1e2e;
-        }
-        body.dark-mode .card {
-            background-color: #16213e;
-            color: #e0e0e0;
-        }
-        body.dark-mode .table {
-            color: #e0e0e0;
-        }
-        body.dark-mode .table td, 
-        body.dark-mode .table th {
-            border-color: #2c2c3e;
-        }
-        body.dark-mode .border-bottom {
-            border-color: #2c2c3e !important;
-        }
-        body.dark-mode .btn-outline-secondary {
-            color: #e0e0e0;
-            border-color: #e0e0e0;
-        }
-        body.dark-mode .btn-outline-secondary:hover {
-            background-color: #e0e0e0;
-            color: #1a1a2e;
-        }
-        /* Sidebar y layout existentes */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 260px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        main {
-            margin-left: 260px;
-            padding: 1rem;
-        }
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
-            .sidebar.show { transform: translateX(0); }
-            main { margin-left: 0; }
-        }
-        .sidebar .nav-link {
-            color: white;
-        }
-        .sidebar .nav-link:hover {
-            background-color: #1e3a6b;
-            border-radius: 5px;
-        }
-        .sidebar-logo {
-            text-align: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 15px;
-        }
-        .sidebar-logo h4, .sidebar-logo h5 {
-            color: white;
-            margin: 0;
-        }
+        body { background-color: #f8f9fc; color: #212529; transition: background-color 0.3s; }
+        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background-color: #0a2b4e; overflow-y: auto; z-index: 1000; }
+        main { margin-left: 260px; padding: 1rem; }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); transition: transform 0.3s; } .sidebar.show { transform: translateX(0); } main { margin-left: 0; } }
+        .sidebar .nav-link { color: white; }
+        .sidebar .nav-link:hover { background-color: #1e3a6b; border-radius: 5px; }
+        .sidebar-logo { text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
+        .sidebar-logo h4, .sidebar-logo h5 { color: white; margin: 0; }
+        .card { background-color: #fff; border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        .table { color: #212529; }
+
+        html.dark-mode body { background-color: #1a1a2e; color: #e0e0e0; }
+        html.dark-mode .sidebar { background-color: #0a0a15; }
+        html.dark-mode .sidebar .nav-link { color: #ccc; }
+        html.dark-mode .sidebar .nav-link:hover { background-color: #1e1e2e; }
+        html.dark-mode .card { background-color: #16213e; color: #e0e0e0; }
+        html.dark-mode .table { color: #e0e0e0; }
+        html.dark-mode .table td, html.dark-mode .table th { border-color: #2c2c3e; }
+        html.dark-mode .btn-outline-secondary { color: #e0e0e0; border-color: #e0e0e0; }
+        html.dark-mode .btn-outline-secondary:hover { background-color: #e0e0e0; color: #1a1a2e; }
     </style>
-    <script>
-    (function() {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-        } else if (theme === 'light') {
-            document.documentElement.classList.remove('dark-mode');
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            // Opcional: seguir la preferencia del sistema
-            document.documentElement.classList.add('dark-mode');
-        }
-    })();
-</script>
 </head>
 <body>
 <nav class="sidebar">
@@ -132,7 +57,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
             <li class="nav-item"><a href="/director/cursos.php" class="nav-link"><i class="bi bi-book"></i> Cursos</a></li>
             <li class="nav-item"><a href="/director/asignaturas.php" class="nav-link"><i class="bi bi-journal"></i> Asignaturas</a></li>
             <li class="nav-item"><a href="/director/noticias.php" class="nav-link"><i class="bi bi-newspaper"></i> Noticias</a></li>
-            <li class="nav-item"><a href="/director/logs.php" class="nav-link"><i class="bi bi-journal-text"></i> Registro de actividades</a></li>
+            <li class="nav-item"><a href="/director/logs.php" class="nav-link"><i class="bi bi-journal-text"></i> Logs</a></li>
             <li class="nav-item"><a href="/director/reportes.php" class="nav-link"><i class="bi bi-file-earmark-pdf"></i> Reportes</a></li>
             <li class="nav-item"><a href="/shared/calendario.php" class="nav-link"><i class="bi bi-calendar"></i> Calendario</a></li>
             <li class="nav-item"><a href="/shared/mensajes.php" class="nav-link"><i class="bi bi-envelope"></i> Mensajes</a></li>
@@ -148,7 +73,7 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
             <li class="nav-item"><a href="/shared/calendario.php" class="nav-link"><i class="bi bi-calendar"></i> Calendario</a></li>
             <li class="nav-item"><a href="/shared/mensajes.php" class="nav-link"><i class="bi bi-envelope"></i> Mensajes</a></li>
         <?php elseif ($rol == 'auxiliar'): ?>
-            <li class="nav-item"><a href="/auxiliar/asistencia.php" class="nav-link"><i class="bi bi-calendar-check"></i> Registrar Asistencia</a></li>
+            <li class="nav-item"><a href="/auxiliar/asistencia.php" class="nav-link"><i class="bi bi-calendar-check"></i> Asistencia</a></li>
             <li class="nav-item"><a href="/shared/calendario.php" class="nav-link"><i class="bi bi-calendar"></i> Calendario</a></li>
             <li class="nav-item"><a href="/shared/mensajes.php" class="nav-link"><i class="bi bi-envelope"></i> Mensajes</a></li>
         <?php elseif ($rol == 'estudiante'): ?>
@@ -178,12 +103,13 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
 </nav>
 <main>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2"><?php echo htmlspecialchars($titulo_pagina); ?></h1>
+        <h1><?= htmlspecialchars($titulo_pagina) ?></h1>
         <div>
-            <!-- Botón modo oscuro/claro -->
-            <button id="themeToggle" class="btn btn-sm btn-outline-secondary me-2">
-                <i class="bi bi-moon-stars"></i> Modo oscuro
-            </button>
-            <span class="badge bg-secondary"><?php echo ucfirst($rol); ?>: <?php echo htmlspecialchars($nombre); ?></span>
+            <?php if ($theme_class === 'dark-mode'): ?>
+                <a href="?theme=light" class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-sun"></i> Modo claro</a>
+            <?php else: ?>
+                <a href="?theme=dark" class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-moon-stars"></i> Modo oscuro</a>
+            <?php endif; ?>
+            <span class="badge bg-secondary"><?= ucfirst($rol) ?>: <?= htmlspecialchars($nombre) ?></span>
         </div>
     </div>

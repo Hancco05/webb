@@ -17,54 +17,47 @@ try {
     die("Error de conexión: " . $e->getMessage());
 }
 
-// ========== FUNCIONES BÁSICAS ==========
+// ==================== FUNCIONES BÁSICAS ====================
 function obtenerDatosUsuario($user_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
     $stmt->execute([$user_id]);
     return $stmt->fetch();
 }
-
 function obtenerCursos() {
     global $pdo;
     return $pdo->query("SELECT * FROM cursos ORDER BY anio, nombre")->fetchAll();
 }
-
 function obtenerAsignaturasPorCurso($curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT * FROM asignaturas WHERE curso_id = ?");
     $stmt->execute([$curso_id]);
     return $stmt->fetchAll();
 }
-
 function obtenerEstudiantesPorCurso($curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT u.id, u.nombre, u.email FROM usuarios u JOIN estudiantes e ON u.id = e.user_id WHERE e.curso_id = ? AND u.rol = 'estudiante'");
     $stmt->execute([$curso_id]);
     return $stmt->fetchAll();
 }
-
 function obtenerProfesores() {
     global $pdo;
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE rol = 'profesor'");
     $stmt->execute();
     return $stmt->fetchAll();
 }
-
 function obtenerCursosPorProfesor($profesor_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT DISTINCT c.* FROM cursos c JOIN profesor_asignatura_curso pac ON c.id = pac.curso_id WHERE pac.profesor_id = ?");
     $stmt->execute([$profesor_id]);
     return $stmt->fetchAll();
 }
-
 function obtenerAsignaturasPorProfesorCurso($profesor_id, $curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT a.* FROM asignaturas a JOIN profesor_asignatura_curso pac ON a.id = pac.asignatura_id WHERE pac.profesor_id = ? AND pac.curso_id = ?");
     $stmt->execute([$profesor_id, $curso_id]);
     return $stmt->fetchAll();
 }
-
 function obtenerHijos($apoderado_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT u.*, e.curso_id, c.nombre as curso_nombre FROM usuarios u JOIN apoderado_estudiante ae ON u.id = ae.estudiante_id JOIN estudiantes e ON u.id = e.user_id JOIN cursos c ON e.curso_id = c.id WHERE ae.apoderado_id = ?");
@@ -72,7 +65,7 @@ function obtenerHijos($apoderado_id) {
     return $stmt->fetchAll();
 }
 
-// ========== HORARIOS ==========
+// ==================== HORARIOS ====================
 function obtenerHorariosPorCurso($curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT h.*, a.nombre as asignatura_nombre FROM horarios h JOIN asignaturas a ON h.asignatura_id = a.id WHERE h.curso_id = ? ORDER BY FIELD(h.dia_semana, 'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'), h.hora_inicio");
@@ -90,7 +83,7 @@ function eliminarHorario($id) {
     return $stmt->execute([$id]);
 }
 
-// ========== CSRF ==========
+// ==================== CSRF ====================
 function generarTokenCSRF() {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -101,7 +94,7 @@ function verificarTokenCSRF($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// ========== CORREO ==========
+// ==================== CORREO ====================
 function enviarCorreo($destinatario, $asunto, $cuerpoHtml, $cuerpoTexto = '') {
     $mail = new PHPMailer(true);
     try {
@@ -126,7 +119,7 @@ function enviarCorreo($destinatario, $asunto, $cuerpoHtml, $cuerpoTexto = '') {
     }
 }
 
-// ========== TAREAS ==========
+// ==================== TAREAS ====================
 function obtenerTareasPorCurso($curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT t.*, a.nombre as asignatura_nombre, u.nombre as profesor_nombre FROM tareas t JOIN asignaturas a ON t.asignatura_id = a.id JOIN usuarios u ON t.creado_por = u.id WHERE t.curso_id = ? ORDER BY t.fecha_entrega ASC");
@@ -155,7 +148,7 @@ function eliminarTarea($id) {
     return $stmt->execute([$id]);
 }
 
-// ========== ENTREGAS ==========
+// ==================== ENTREGAS ====================
 function obtenerEntregasPorTarea($tarea_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT e.*, u.nombre as estudiante_nombre FROM entregas e JOIN usuarios u ON e.estudiante_id = u.id WHERE e.tarea_id = ? ORDER BY e.fecha_entrega DESC");
@@ -185,7 +178,7 @@ function calificarEntrega($entrega_id, $calificacion, $comentario_profesor = nul
     return $stmt->execute([$calificacion, $comentario_profesor, $entrega_id]);
 }
 
-// ========== LOGS ==========
+// ==================== LOGS ====================
 function registrarLog($usuario_id, $accion, $tabla_afectada = null, $registro_id = null, $detalles = null) {
     global $pdo;
     try {
@@ -193,12 +186,10 @@ function registrarLog($usuario_id, $accion, $tabla_afectada = null, $registro_id
         $nombre = $usuario['nombre'];
         $rol = $usuario['rol'];
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
         $stmt = $pdo->prepare("INSERT INTO logs (usuario_id, usuario_nombre, usuario_rol, accion, tabla_afectada, registro_id, detalles, ip_address, user_agent) VALUES (?,?,?,?,?,?,?,?,?)");
-        $stmt->execute([$usuario_id, $nombre, $rol, $accion, $tabla_afectada, $registro_id, $detalles, $ip, $user_agent]);
-    } catch (Exception $e) {
-        error_log("Error en registrarLog: " . $e->getMessage());
-    }
+        $stmt->execute([$usuario_id, $nombre, $rol, $accion, $tabla_afectada, $registro_id, $detalles, $ip, $ua]);
+    } catch (Exception $e) { error_log($e->getMessage()); }
 }
 function obtenerLogs($limite = 50, $offset = 0, $filtro_usuario = null, $filtro_accion = null) {
     global $pdo;
@@ -222,7 +213,7 @@ function contarLogs($filtro_usuario = null, $filtro_accion = null) {
     return $stmt->fetchColumn();
 }
 
-// ========== MENSAJERÍA ==========
+// ==================== MENSAJERÍA ====================
 function enviarMensaje($from_id, $to_id, $asunto, $mensaje, $parent_id = null) {
     global $pdo;
     $stmt = $pdo->prepare("INSERT INTO mensajes (from_user_id, to_user_id, asunto, mensaje, parent_id) VALUES (?,?,?,?,?)");
@@ -280,14 +271,13 @@ function buscarUsuarios($termino, $excluir_id = null) {
     return $stmt->fetchAll();
 }
 
-// ========== SEGURIDAD: INTENTOS LOGIN ==========
-function verificarIntentosFallidos($email, $ip, $limite = 5, $tiempo_bloqueo_minutos = 15) {
+// ==================== SEGURIDAD: INTENTOS LOGIN ====================
+function verificarIntentosFallidos($email, $ip, $limite = 5, $minutos = 15) {
     global $pdo;
-    $tiempo_limite = date('Y-m-d H:i:s', strtotime("-$tiempo_bloqueo_minutos minutes"));
+    $limite_tiempo = date('Y-m-d H:i:s', strtotime("-$minutos minutes"));
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM intentos_login WHERE email = ? AND intento_time > ?");
-    $stmt->execute([$email, $tiempo_limite]);
-    $intentos = $stmt->fetchColumn();
-    return $intentos < $limite;
+    $stmt->execute([$email, $limite_tiempo]);
+    return $stmt->fetchColumn() < $limite;
 }
 function registrarIntentoFallido($email, $ip) {
     global $pdo;
@@ -300,12 +290,12 @@ function limpiarIntentosExitosos($email) {
     return $stmt->execute([$email]);
 }
 
-// ========== POLÍTICA CONTRASEÑA ==========
+// ==================== POLÍTICA CONTRASEÑA ====================
 function validarPassword($password) {
     return preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password);
 }
 
-// ========== CALENDARIO (EVENTOS) ==========
+// ==================== CALENDARIO (EVENTOS) ====================
 function obtenerEventos($fecha_inicio = null, $fecha_fin = null, $curso_id = null) {
     global $pdo;
     $sql = "SELECT e.*, c.nombre as curso_nombre, a.nombre as asignatura_nombre FROM eventos e LEFT JOIN cursos c ON e.curso_id = c.id LEFT JOIN asignaturas a ON e.asignatura_id = a.id WHERE 1=1";
@@ -333,7 +323,7 @@ function eliminarEvento($id) {
     return $stmt->execute([$id]);
 }
 
-// ========== CUESTIONARIOS ==========
+// ==================== CUESTIONARIOS ====================
 function obtenerCuestionariosPorCurso($curso_id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT c.*, a.nombre as asignatura_nombre, u.nombre as profesor_nombre FROM cuestionarios c JOIN asignaturas a ON c.asignatura_id = a.id JOIN usuarios u ON c.profesor_id = u.id WHERE c.curso_id = ? AND c.fecha_fin >= NOW() ORDER BY c.fecha_inicio");
