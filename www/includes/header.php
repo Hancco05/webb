@@ -17,13 +17,96 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background-color: #0a2b4e; overflow-y: auto; z-index: 1000; }
-        main { margin-left: 260px; padding: 1rem; }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); transition: transform 0.3s; } .sidebar.show { transform: translateX(0); } main { margin-left: 0; } }
-        .sidebar .nav-link { color: white; }
-        .sidebar .nav-link:hover { background-color: #1e3a6b; border-radius: 5px; }
-        .sidebar-logo { text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
-        .sidebar-logo h4, .sidebar-logo h5 { color: white; margin: 0; }
+        /* Estilos base (claro) */
+        body {
+            background-color: #f8f9fc;
+            color: #212529;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .sidebar {
+            background-color: #0a2b4e;
+            transition: background-color 0.3s;
+        }
+        .card {
+            background-color: #ffffff;
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+        .table {
+            color: #212529;
+        }
+        /* Modo oscuro */
+        body.dark-mode {
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+        body.dark-mode .sidebar {
+            background-color: #0a0a15;
+        }
+        body.dark-mode .sidebar .nav-link {
+            color: #cccccc;
+        }
+        body.dark-mode .sidebar .nav-link:hover {
+            background-color: #1e1e2e;
+        }
+        body.dark-mode .card {
+            background-color: #16213e;
+            color: #e0e0e0;
+        }
+        body.dark-mode .table {
+            color: #e0e0e0;
+        }
+        body.dark-mode .table td, 
+        body.dark-mode .table th {
+            border-color: #2c2c3e;
+        }
+        body.dark-mode .border-bottom {
+            border-color: #2c2c3e !important;
+        }
+        body.dark-mode .btn-outline-secondary {
+            color: #e0e0e0;
+            border-color: #e0e0e0;
+        }
+        body.dark-mode .btn-outline-secondary:hover {
+            background-color: #e0e0e0;
+            color: #1a1a2e;
+        }
+        /* Sidebar y layout existentes */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        main {
+            margin-left: 260px;
+            padding: 1rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            .sidebar.show { transform: translateX(0); }
+            main { margin-left: 0; }
+        }
+        .sidebar .nav-link {
+            color: white;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #1e3a6b;
+            border-radius: 5px;
+        }
+        .sidebar-logo {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+        }
+        .sidebar-logo h4, .sidebar-logo h5 {
+            color: white;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -83,5 +166,11 @@ $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
 <main>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2"><?php echo htmlspecialchars($titulo_pagina); ?></h1>
-        <span class="badge bg-secondary"><?php echo ucfirst($rol); ?>: <?php echo htmlspecialchars($nombre); ?></span>
+        <div>
+            <!-- Botón modo oscuro/claro -->
+            <button id="themeToggle" class="btn btn-sm btn-outline-secondary me-2">
+                <i class="bi bi-moon-stars"></i> Modo oscuro
+            </button>
+            <span class="badge bg-secondary"><?php echo ucfirst($rol); ?>: <?php echo htmlspecialchars($nombre); ?></span>
+        </div>
     </div>
