@@ -8,7 +8,7 @@ $rol = $_SESSION['rol'];
 $nombre = $_SESSION['nombre'];
 $titulo_pagina = $titulo_pagina ?? 'Panel de Control';
 
-// Modo oscuro vía GET para cambiar y guardar en sesión
+// Modo oscuro vía GET (se guarda en sesión)
 if (isset($_GET['theme'])) {
     $_SESSION['theme'] = $_GET['theme'] === 'dark' ? 'dark' : 'light';
     $redirect = strtok($_SERVER['REQUEST_URI'], '?');
@@ -21,35 +21,169 @@ $theme_class = (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'd
 <html lang="es" class="<?= $theme_class ?>">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($titulo_pagina) ?> - Sistema Educativo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fc; color: #212529; transition: background-color 0.3s; }
-        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background-color: #0a2b4e; overflow-y: auto; z-index: 1000; }
-        main { margin-left: 260px; padding: 1rem; }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); transition: transform 0.3s; } .sidebar.show { transform: translateX(0); } main { margin-left: 0; } }
-        .sidebar .nav-link { color: white; }
-        .sidebar .nav-link:hover { background-color: #1e3a6b; border-radius: 5px; }
-        .sidebar-logo { text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
-        .sidebar-logo h4, .sidebar-logo h5 { color: white; margin: 0; }
-        .card { background-color: #fff; border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
-        .table { color: #212529; }
-
-        html.dark-mode body { background-color: #1a1a2e; color: #e0e0e0; }
-        html.dark-mode .sidebar { background-color: #0a0a15; }
-        html.dark-mode .sidebar .nav-link { color: #ccc; }
-        html.dark-mode .sidebar .nav-link:hover { background-color: #1e1e2e; }
-        html.dark-mode .card { background-color: #16213e; color: #e0e0e0; }
-        html.dark-mode .table { color: #e0e0e0; }
-        html.dark-mode .table td, html.dark-mode .table th { border-color: #2c2c3e; }
-        html.dark-mode .btn-outline-secondary { color: #e0e0e0; border-color: #e0e0e0; }
-        html.dark-mode .btn-outline-secondary:hover { background-color: #e0e0e0; color: #1a1a2e; }
+        /* ---------- ESTILOS GLOBALES ---------- */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        /* Sidebar moderno */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar .nav-link {
+            color: #f0f0f0;
+            border-radius: 10px;
+            margin: 5px 10px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        .sidebar-logo {
+            text-align: center;
+            padding: 25px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 15px;
+        }
+        .sidebar-logo h4, .sidebar-logo h5 {
+            color: white;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        /* Contenido principal */
+        main {
+            margin-left: 260px;
+            padding: 1.5rem;
+        }
+        /* Tarjetas modernas */
+        .card {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(5px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            background: rgba(255,255,255,0.7);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-radius: 20px 20px 0 0 !important;
+            font-weight: 600;
+        }
+        .table {
+            background: transparent;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        /* Botones personalizados */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-outline-secondary {
+            border-radius: 25px;
+        }
+        /* Barra superior */
+        .top-bar {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        /* Modo oscuro */
+        html.dark-mode body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        html.dark-mode .sidebar {
+            background: rgba(10, 10, 21, 0.95);
+        }
+        html.dark-mode .card {
+            background: rgba(30, 30, 50, 0.9);
+            color: #e0e0e0;
+        }
+        html.dark-mode .card-header {
+            background: rgba(40, 40, 60, 0.8);
+            border-bottom-color: #2c2c3e;
+        }
+        html.dark-mode .table {
+            color: #e0e0e0;
+        }
+        html.dark-mode .table td, 
+        html.dark-mode .table th {
+            border-color: #2c2c3e;
+        }
+        html.dark-mode .top-bar {
+            background: rgba(0,0,0,0.3);
+        }
+        html.dark-mode .btn-outline-secondary {
+            color: #e0e0e0;
+            border-color: #e0e0e0;
+        }
+        html.dark-mode .btn-outline-secondary:hover {
+            background-color: #e0e0e0;
+            color: #1a1a2e;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            main {
+                margin-left: 0;
+            }
+            .top-bar .btn-sm {
+                margin-top: 5px;
+            }
+        }
     </style>
 </head>
 <body>
+
+<!-- Sidebar moderno -->
 <nav class="sidebar">
-    <div class="sidebar-logo"><h4>Sistema Educativo</h4><h5>Mi Colegio</h5></div>
+    <div class="sidebar-logo">
+        <h4>Sistema Educativo</h4>
+        <h5>Mi Colegio</h5>
+    </div>
     <ul class="nav nav-pills flex-column">
         <?php if ($rol == 'director'): ?>
             <li class="nav-item"><a href="/director/dashboard.php" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
@@ -101,15 +235,18 @@ $theme_class = (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'd
         <li class="nav-item"><a href="/logout.php" class="nav-link"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
     </ul>
 </nav>
+
 <main>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1><?= htmlspecialchars($titulo_pagina) ?></h1>
-        <div>
+    <!-- Barra superior con título, modo oscuro y datos de usuario -->
+    <div class="top-bar d-flex flex-wrap justify-content-between align-items-center">
+        <h1 class="h3 mb-0"><?= htmlspecialchars($titulo_pagina) ?></h1>
+        <div class="mt-2 mt-sm-0">
             <?php if ($theme_class === 'dark-mode'): ?>
                 <a href="?theme=light" class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-sun"></i> Modo claro</a>
             <?php else: ?>
                 <a href="?theme=dark" class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-moon-stars"></i> Modo oscuro</a>
             <?php endif; ?>
-            <span class="badge bg-secondary"><?= ucfirst($rol) ?>: <?= htmlspecialchars($nombre) ?></span>
+            <span class="badge bg-dark"><?= ucfirst($rol) ?>: <?= htmlspecialchars($nombre) ?></span>
         </div>
     </div>
+    <!-- Aquí se inyecta el contenido específico de cada página -->
