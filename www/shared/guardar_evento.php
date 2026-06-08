@@ -2,7 +2,6 @@
 require_once '../includes/auth.php';
 verificarSesion('director');
 require_once '../includes/db.php';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titulo = $_POST['titulo'];
     $descripcion = $_POST['descripcion'];
@@ -13,12 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo = $_POST['tipo'];
     $curso_id = $_POST['curso_id'] ?: null;
     $asignatura_id = $_POST['asignatura_id'] ?: null;
-    $creado_por = $_SESSION['user_id'];
-    
-    $stmt = $pdo->prepare("INSERT INTO eventos (titulo, descripcion, fecha_inicio, fecha_fin, hora_inicio, hora_fin, tipo, curso_id, asignatura_id, creado_por) VALUES (?,?,?,?,?,?,?,?,?,?)");
-    $stmt->execute([$titulo, $descripcion, $fecha_inicio, $fecha_fin, $hora_inicio, $hora_fin, $tipo, $curso_id, $asignatura_id, $creado_por]);
-    $_SESSION['mensaje'] = "Evento creado.";
-    header("Location: calendario.php");
+    crearEvento($titulo, $descripcion, $fecha_inicio, $fecha_fin, $hora_inicio, $hora_fin, $tipo, $curso_id, $asignatura_id, $_SESSION['user_id']);
+    $_SESSION['mensaje'] = "Evento creado";
+    header("Location: /shared/calendario.php");
     exit;
 }
 ?>
