@@ -1,0 +1,166 @@
+================================================================================
+                   MANUAL DEL SISTEMA EDUCATIVO (VERSIÓN AMIGABLE)
+================================================================================
+
+Hola. Este manual te ayudará a usar el sistema escolar. Está pensado para que 
+cada persona (director, profesor, alumno, apoderado, auxiliar) encuentre lo que 
+necesita de forma sencilla.
+
+Si en algún momento te pierdes, pregunta al director o al profesor encargado.
+
+================================================================================
+1. CÓMO INGRESAR AL SISTEMA
+================================================================================
+
+Abre tu navegador (Chrome, Firefox, Edge) y escribe la dirección que te dieron 
+(normalmente http://localhost:8080 si pruebas en tu propia computadora).
+
+Verás una pantalla con fondo de colores. Escribe:
+- Tu correo electrónico (ejemplo: profesor@colegio.com)
+- Tu contraseña (para probar, todos usan 123456, pero luego cada quien debe cambiarla)
+- Resuelve la suma que aparece (eso evita que programas automáticos intenten entrar).
+
+Haz clic en "Ingresar". Si todo está bien, entrarás a tu escritorio personal.
+
+>> Si fallas la contraseña 5 veces seguidas, se bloquea el acceso por 15 minutos. 
+   Espera un rato y vuelve a intentar.
+
+================================================================================
+2. QUÉ PUEDE HACER CADA ROL
+================================================================================
+
+2.1 DIRECTOR (EL JEFE DEL SISTEMA)
+
+El director es quien administra todo. Puede:
+
+- VER RESÚMENES: al entrar ve gráficos y números (cuántos usuarios, cursos, etc.)
+- CREAR / EDITAR / ELIMINAR USUARIOS: dar de alta a profesores, alumnos, apoderados.
+- ADMINISTRAR CURSOS Y MATERIAS: agregar cursos (1ro básico, 2do medio...), y sus asignaturas.
+- PUBLICAR NOTICIAS: escribir avisos que aparecerán para todos o solo para un grupo (ej: solo para apoderados).
+- VER REGISTRO DE ACTIVIDADES: un historial de quién hizo qué (ej: "el director Juan creó un usuario").
+- GENERAR REPORTES: hacer listados en PDF o Excel (por ejemplo, lista de todos los alumnos).
+- CREAR EVENTOS EN EL CALENDARIO: reuniones, feriados, evaluaciones (pueden ser para un curso específico o para toda la escuela).
+- ENVIAR MENSAJES: a cualquier usuario.
+- ENVIAR RECORDATORIOS POR CORREO: por ejemplo, avisar a todos los apoderados sobre una reunión.
+- CAMBIAR SU CONTRASEÑA Y SU PERFIL.
+
+2.2 PROFESOR
+
+El profesor trabaja con sus propios cursos y estudiantes. Puede:
+
+- VER SUS CURSOS: en el panel principal ve una lista de los cursos que le asignaron.
+- PONER NOTAS: ingresar calificaciones por materia y por periodo (1er bimestre, 2do, etc.). Las notas se guardan automáticamente.
+- REGISTRAR ASISTENCIA: marcar quién vino, quién faltó o llegó tarde. Puede elegir la fecha.
+- CREAR HORARIOS: definir qué días y horas tiene cada asignatura.
+- CREAR TAREAS: escribir una descripción y una fecha de entrega. Los alumnos pueden subir archivos y el profesor puede calificarlos.
+- CREAR EVALUACIONES (CUESTIONARIOS): diseñar preguntas de opción múltiple o verdadero/falso, con puntaje. Luego ve las calificaciones automáticas de los alumnos.
+- VER CALENDARIO: eventos que el director creó para sus cursos.
+- ENVIAR Y RECIBIR MENSAJES: con otros profesores, director, alumnos o apoderados.
+- GENERAR REPORTES: PDF con las notas, asistencia o tareas de sus cursos.
+
+2.3 ESTUDIANTE (ALUMNO)
+
+El alumno solo ve su propia información. Puede:
+
+- VER SUS NOTAS: materias y períodos.
+- VER SU HORARIO: qué clase tiene cada día.
+- VER SU ASISTENCIA: fechas y si faltó o llegó tarde.
+- VER TAREAS: las que le asignaron y puede subir su entrega (archivo PDF, Word, imagen).
+- RESPONDER EVALUACIONES: hacer los cuestionarios que el profesor publique (dentro de las fechas). Al terminar, recibe su nota automáticamente.
+- VER CALENDARIO: eventos de su curso.
+- MANDAR MENSAJES: por ejemplo, consultar una duda al profesor.
+- CAMBIAR SU CONTRASEÑA (desde "Mi Perfil").
+
+2.4 APODERADO (PAPÁ O MAMÁ)
+
+El apoderado debe primero seleccionar a su hijo (si tiene más de uno). Luego puede:
+
+- VER NOTAS, ASISTENCIA, HORARIO Y TAREAS DE SU HIJO.
+- LEER NOTICIAS Y RECORDATORIOS que están dirigidos a apoderados.
+- GENERAR REPORTES PDF: descargar un resumen de notas o asistencia de su hijo.
+- ENVIAR MENSAJES: puede escribirle al profesor o al director.
+- CAMBIAR SU CONTRASEÑA.
+
+2.5 AUXILIAR (PORTERO O ASISTENTE)
+
+Su labor principal es ayudar con la asistencia. Puede:
+
+- REGISTRAR ASISTENCIA: elegir un curso y una fecha, y marcar quién está presente, ausente o tarde.
+- VER CALENDARIO y mensajes (por si recibe indicaciones).
+
+================================================================================
+3. COSAS QUE TODOS DEBEN SABER
+================================================================================
+
+- MODO OSCURO / CLARO: Arriba a la derecha hay un botón con una luna o un sol. 
+  Si te molestan los colores brillantes, haz clic y la pantalla se vuelve oscura. 
+  Es más cómodo para la noche.
+
+- MENSAJES: En el menú de la izquierda hay un ícono de sobre. Si ves un número 
+  en rojo, tienes mensajes sin leer.
+
+- CERRAR SESIÓN: Cuando termines de usar el sistema, haz clic en "Cerrar Sesión" 
+  en el menú lateral. Así tu cuenta queda protegida.
+
+- CAMBIAR CONTRASEÑA: Ve a "Mi Perfil" y luego "Cambiar Contraseña". 
+  La nueva clave debe tener al menos 8 caracteres, una mayúscula, una minúscula 
+  y un número (por ejemplo: MiClave2025).
+
+- TU PERFIL: Puedes actualizar tu nombre y correo electrónico.
+
+================================================================================
+4. QUÉ HACER SI ALGO NO FUNCIONA
+================================================================================
+
+¿Te salió un mensaje de error o algo no carga?
+
+- Primero, revisa que tengas internet (aunque sea para cargar los estilos).
+- Cierra el navegador y vuelve a abrirlo.
+- Si el problema es al enviar un formulario, prueba refrescar la página (F5) y vuelve a intentar.
+- Asegúrate de no tener varias pestañas con el sistema abiertas, porque a veces la sesión se confunde.
+- Si ves "Token inválido" o algo parecido, es una medida de seguridad. Solo tienes que recargar la página y volver a enviar el formulario.
+- Si no puedes subir un archivo, verifica que pese menos de 2 MB y que sea de un tipo permitido (PDF, Word, imagen, ZIP).
+
+Si nada de esto funciona, contacta al director o al encargado de sistemas.
+
+================================================================================
+5. PREGUNTAS FRECUENTES (EN LENGUAJE SENCILLO)
+================================================================================
+
+➤ Olvidé mi contraseña. ¿Qué hago?
+   Pídele al director que te la restablezca. En este sistema no hay 
+   "recuperar contraseña por correo" por seguridad.
+
+➤ ¿Puedo usar el sistema desde el celular?
+   Sí. Se adapta a pantallas pequeñas (aunque el menú se oculta; tienes que 
+   tocar el botón de las tres rayas para abrirlo).
+
+➤ Subí una tarea, pero no veo la nota. ¿Cuándo la pondrá el profesor?
+   El profesor debe calificarla manualmente. Puedes enviarle un mensaje 
+   para recordarle, pero dale unos días.
+
+➤ El calendario se ve vacío. ¿Está roto?
+   No, solo que todavía no hay eventos creados. El director o profesor deben 
+   agregar reuniones, feriados o evaluaciones.
+
+➤ ¿Por qué a veces me redirige a la pantalla de inicio de sesión?
+   Puede que tu sesión haya expirado (si pasaste mucho tiempo sin hacer clic). 
+   Vuelve a entrar y ya.
+
+➤ ¿Puedo cambiar mi foto de perfil?
+   No en esta versión, pero quizás en el futuro.
+
+➤ ¿Cómo sé si un cuestionario ya lo respondí?
+   En la lista de evaluaciones, al lado aparecerá "Completado" y ya no podrás 
+   volver a responder si agotaste los intentos.
+
+================================================================================
+                        ¡ESO ES TODO! BUEN TRABAJO
+================================================================================
+
+Esperamos que este manual te sirva. El sistema está hecho para facilitar la 
+comunicación y el seguimiento escolar. Si tienes sugerencias, compártelas con 
+el director.
+
+Gracias por usar nuestro sistema educativo.
+================================================================================
