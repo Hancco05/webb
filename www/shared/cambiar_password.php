@@ -1,62 +1,39 @@
 <?php
 session_start();
 require_once '../includes/db.php';
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
-    exit;
-}
+if (!isset($_SESSION['user_id'])) { header('Location: /index.php'); exit; }
 $titulo_pagina = 'Cambiar Contraseña';
 include '../includes/header.php';
-
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $actual = $_POST['actual'];
     $nueva = $_POST['nueva'];
     $confirmar = $_POST['confirmar'];
-    $user_id = $_SESSION['user_id'];
-    $usuario = obtenerDatosUsuario($user_id);
-    
+    $usuario = obtenerDatosUsuario($_SESSION['user_id']);
     if (!password_verify($actual, $usuario['password_hash'])) {
         $error = "Contraseña actual incorrecta";
     } elseif ($nueva !== $confirmar) {
         $error = "Las nuevas contraseñas no coinciden";
     } elseif (!validarPassword($nueva)) {
-        $error = "La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.";
+        $error = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.";
     } else {
         $hash = password_hash($nueva, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("UPDATE usuarios SET password_hash=? WHERE id=?");
-        $stmt->execute([$hash, $user_id]);
-        registrarLog($user_id, 'cambiar_password', 'usuarios', $user_id, "Cambio de contraseña");
-        $_SESSION['mensaje'] = "Contraseña actualizada correctamente.";
-        header("Location: cambiar_password.php");
+        $stmt->execute([$hash, $_SESSION['user_id']]);
+        $_SESSION['mensaje'] = "Contraseña actualizada";
+        header("Location: /shared/cambiar_password.php");
         exit;
     }
 }
 ?>
-<div class="card">
-    <div class="card-header">Cambiar Contraseña</div>
-    <div class="card-body">
-        <?php if(isset($_SESSION['mensaje'])): ?>
-            <div class="alert alert-success"><?= $_SESSION['mensaje']; unset($_SESSION['mensaje']); ?></div>
-        <?php endif; ?>
-        <?php if(isset($error)): ?>
-            <div class="alert alert-danger"><?= $error ?></div>
-        <?php endif; ?>
-        <form method="POST">
-            <div class="mb-3">
-                <label>Contraseña actual</label>
-                <input type="password" name="actual" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label>Nueva contraseña</label>
-                <input type="password" name="nueva" class="form-control" required>
-                <small class="text-muted">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</small>
-            </div>
-            <div class="mb-3">
-                <label>Confirmar nueva contraseña</label>
-                <input type="password" name="confirmar" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Cambiar</button>
-        </form>
-    </div>
-</div>
+<div class="card"><div class="card-header">Cambiar Contraseña</div><div class="card-body">
+    <?php if(isset($_SESSION['mensaje'])): ?><div class="alert alert-success"><?= $_SESSION['mensaje']; unset($_SESSION['mensaje']); ?></div><?php endif; ?>
+    <?php if($error): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
+    <form method="POST">
+        <div class="mb-3"><label>Contraseña actual</label><input type="password" name="actual" class="form-control" required></div>
+        <div class="mb-3"><label>Nueva contraseña</label><input type="password" name="nueva" class="form-control" required><small class="text-muted">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</small></div>
+        <div class="mb-3"><label>Confirmar nueva</label><input type="password" name="confirmar" class="form-control" required></div>
+        <button type="submit" class="btn btn-primary">Cambiar</button>
+    </form>
+</div></div>
 <?php include '../includes/footer.php'; ?>
