@@ -2,18 +2,17 @@
 require_once '../includes/auth.php';
 verificarSesion('estudiante');
 require_once '../includes/db.php';
-$titulo_pagina = 'Cuestionarios disponibles';
+$titulo_pagina = 'Evaluaciones disponibles';
 include '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
 $stmt = $pdo->prepare("SELECT curso_id FROM estudiantes WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $curso_id = $stmt->fetchColumn();
-
-$cuestionarios = obtenerCuestionariosPorCurso($curso_id);
+$cuestionarios = $curso_id ? obtenerCuestionariosPorCurso($curso_id) : [];
 ?>
 <div class="card">
-    <div class="card-header">Evaluaciones disponibles</div>
+    <div class="card-header">Cuestionarios disponibles</div>
     <div class="card-body">
         <table class="table">
             <thead><tr><th>Título</th><th>Asignatura</th><th>Fechas</th><th>Intentos</th><th>Acción</th></tr></thead>

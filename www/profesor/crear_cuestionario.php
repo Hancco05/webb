@@ -7,39 +7,43 @@ include '../includes/header.php';
 
 $profesor_id = $_SESSION['user_id'];
 $cursos = obtenerCursosPorProfesor($profesor_id);
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulo = $_POST['titulo'];
-    $descripcion = $_POST['descripcion'];
-    $asignatura_id = $_POST['asignatura_id'];
-    $curso_id = $_POST['curso_id'];
-    $fecha_inicio = $_POST['fecha_inicio'];
-    $fecha_fin = $_POST['fecha_fin'];
-    $tiempo_limite = $_POST['tiempo_limite'] ?: null;
-    $intentos_permitidos = $_POST['intentos_permitidos'] ?: 1;
-    
-    if (crearCuestionario($titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos_permitidos)) {
-        $id = $pdo->lastInsertId();
-        header("Location: editar_preguntas.php?id=$id");
-        exit;
+    if (!verificarTokenCSRF($_POST['csrf_token'] ?? '')) {
+        $error = "Token inválido";
     } else {
-        $error = "Error al crear cuestionario";
+        $titulo = trim($_POST['titulo']);
+        $descripcion = trim($_POST['descripcion']);
+        $asignatura_id = (int)$_POST['asignatura_id'];
+        $curso_id = (int)$_POST['curso_id'];
+        $fecha_inicio = $_POST['fecha_inicio'];
+        $fecha_fin = $_POST['fecha_fin'];
+        $tiempo_limite = $_POST['tiempo_limite'] ?: null;
+        $intentos = (int)$_POST['intentos_permitidos'];
+
+        if (crearCuestionario($titulo, $descripcion, $asignatura_id, $curso_id, $profesor_id, $fecha_inicio, $fecha_fin, $tiempo_limite, $intentos)) {
+            $id = $pdo->lastInsertId();
+            $_SESSION['mensaje'] = "Cuestionario creado. Ahora agregue preguntas.";
+            header("Location: editar_preguntas.php?id=$id");
+            exit;
+        } else {
+            $error = "Error al crear el cuestionario";
+        }
     }
 }
 ?>
 <div class="card">
-    <div class="card-header">Datos del cuestionario</div>
+    <div class="card-header">Nuevo Cuestionario</div>
     <div class="card-body">
-        <?php if(isset($error)) echo "<div class='alert alert-danger'>$error</div>"; ?>
+        <?php if ($error): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF() ?>">
             <div class="mb-2"><label>Título</label><input type="text" name="titulo" class="form-control" required></div>
             <div class="mb-2"><label>Descripción</label><textarea name="descripcion" class="form-control"></textarea></div>
             <div class="row">
                 <div class="col-md-6"><label>Curso</label><select name="curso_id" id="curso_id" class="form-select" required>
-                    <option value="">Seleccione</option>
-                    <?php foreach($cursos as $c): ?>
-                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['nombre']) ?></option>
-                    <?php endforeach; ?>
+                    <option value="">Seleccione</option><?php foreach($cursos as $c): ?><option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['nombre']) ?></option><?php endforeach; ?>
                 </select></div>
                 <div class="col-md-6"><label>Asignatura</label><select name="asignatura_id" id="asignatura_id" class="form-select" required></select></div>
             </div>
@@ -49,20 +53,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-md-3"><label>Tiempo límite (minutos)</label><input type="number" name="tiempo_limite" class="form-control" step="1" min="0"></div>
                 <div class="col-md-3"><label>Intentos permitidos</label><input type="number" name="intentos_permitidos" class="form-control" value="1" step="1" min="1"></div>
             </div>
-            <button type="submit" class="btn btn-primary mt-2">Crear y agregar preguntas</button>
+            <button type="submit" class="btn btn-primary mt-3">Crear y agregar preguntas</button>
         </form>
     </div>
 </div>
 <script>
 document.getElementById('curso_id').addEventListener('change', function() {
     let curso_id = this.value;
-    fetch('../ajax/asignaturas_por_curso.php?curso_id=' + curso_id)
-        .then(res => res.json())
-        .then(data => {
-            let select = document.getElementById('asignatura_id');
-            select.innerHTML = '<option value="">Seleccione asignatura</option>';
-            data.forEach(a => select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`);
-        });
+    if (curso_id) {
+        fetch('/ajax/asignaturas_por_curso.php?curso_id=' + curso_id)
+            .then(res => res.json())
+            .then(data => {
+                let select = document.getElementById('asignatura_id');
+                select.innerHTML = '<option value="">Seleccione asignatura</option>';
+                data.forEach(a => select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`);
+            });
+    } else {
+        document.getElementById('asignatura_id').innerHTML = '<option value="">Primero seleccione curso</option>';
+    }
 });
 </script>
 <?php include '../includes/footer.php'; ?>

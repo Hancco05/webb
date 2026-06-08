@@ -2,39 +2,35 @@
 require_once '../includes/auth.php';
 verificarSesion('estudiante');
 require_once '../includes/db.php';
-$titulo_pagina = 'Responder cuestionario';
+$titulo_pagina = 'Responder Cuestionario';
 include '../includes/header.php';
 
 $cuestionario_id = $_GET['id'] ?? 0;
 $cuestionario = obtenerCuestionario($cuestionario_id);
-if (!$cuestionario) die("No existe");
+if (!$cuestionario) die("Cuestionario no existe");
 $user_id = $_SESSION['user_id'];
 
-// Verificar si ya agotó intentos
 $calif = obtenerCalificacionEstudiante($cuestionario_id, $user_id);
 if ($calif && $calif['intentos'] >= $cuestionario['intentos_permitidos']) {
     echo "<div class='alert alert-danger'>Has agotado tus intentos.</div>";
     include '../includes/footer.php';
     exit;
 }
-
-// Verificar fechas
 if (strtotime($cuestionario['fecha_inicio']) > time()) {
-    echo "<div class='alert alert-warning'>Este cuestionario aún no está disponible.</div>";
+    echo "<div class='alert alert-warning'>Aún no disponible.</div>";
     include '../includes/footer.php';
     exit;
 }
 if (strtotime($cuestionario['fecha_fin']) < time()) {
-    echo "<div class='alert alert-danger'>El plazo para responder ha vencido.</div>";
+    echo "<div class='alert alert-danger'>Vencido.</div>";
     include '../includes/footer.php';
     exit;
 }
 
 $preguntas = obtenerPreguntas($cuestionario_id);
 $preguntas_con_opciones = [];
-foreach($preguntas as $p) {
-    $opciones = obtenerOpciones($p['id']);
-    $preguntas_con_opciones[] = ['pregunta' => $p, 'opciones' => $opciones];
+foreach ($preguntas as $p) {
+    $preguntas_con_opciones[] = ['pregunta' => $p, 'opciones' => obtenerOpciones($p['id'])];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -42,18 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($respuestas as $pregunta_id => $opcion_id) {
         $pregunta = obtenerPregunta($pregunta_id);
         $es_correcta = false;
-        if ($pregunta['tipo'] == 'multiple') {
+        if ($pregunta['tipo'] == 'multiple' || $pregunta['tipo'] == 'verdadero_falso') {
             $stmt = $pdo->prepare("SELECT es_correcta FROM opciones WHERE id = ?");
             $stmt->execute([$opcion_id]);
-            $es_correcta = (bool)$stmt->fetchColumn();
-        } elseif ($pregunta['tipo'] == 'verdadero_falso') {
-            $stmt = $pdo->prepare("SELECT es_correcta FROM opciones WHERE pregunta_id = ? AND id = ?");
-            $stmt->execute([$pregunta_id, $opcion_id]);
             $es_correcta = (bool)$stmt->fetchColumn();
         }
         guardarRespuesta($cuestionario_id, $pregunta_id, $user_id, $opcion_id, null, $es_correcta);
     }
-    // Calcular y guardar calificación final
     $resultado = calcularCalificacion($cuestionario_id, $user_id);
     $_SESSION['mensaje'] = "Has obtenido {$resultado['obtenido']}/{$resultado['total']} puntos.";
     header("Location: cuestionarios.php");
@@ -73,12 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <strong><?= ($idx+1) . '. ' . htmlspecialchars($p['enunciado']) ?></strong> (<?= $p['puntos'] ?> ptos)<br>
                 <?php if ($p['tipo'] == 'multiple'): ?>
                     <?php foreach($opciones as $op): ?>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="respuestas[<?= $p['id'] ?>]" value="<?= $op['id'] ?>" required>
-                            <label class="form-check-label"><?= htmlspecialchars($op['texto']) ?></label>
-                        </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="respuestas[<?= $p['id'] ?>]" value="<?= $op['id'] ?>" required>
+                        <label class="form-check-label"><?= htmlspecialchars($op['texto']) ?></label>
+                    </div>
                     <?php endforeach; ?>
-                <?php elseif ($p['tipo'] == 'verdadero_falso'): ?>
+                <?php elseif ($p['tipo'] == 'verdadero_falso' && count($opciones) >= 2): ?>
                     <div class="form-check"><input type="radio" name="respuestas[<?= $p['id'] ?>]" value="<?= $opciones[0]['id'] ?>" required> Verdadero</div>
                     <div class="form-check"><input type="radio" name="respuestas[<?= $p['id'] ?>]" value="<?= $opciones[1]['id'] ?>"> Falso</div>
                 <?php endif; ?>

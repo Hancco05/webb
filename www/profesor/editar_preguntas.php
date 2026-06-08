@@ -7,38 +7,43 @@ include '../includes/header.php';
 
 $cuestionario_id = $_GET['id'] ?? 0;
 $cuestionario = obtenerCuestionario($cuestionario_id);
-if (!$cuestionario) die("Cuestionario no encontrado");
+if (!$cuestionario || $cuestionario['profesor_id'] != $_SESSION['user_id']) {
+    die("No autorizado o cuestionario no existe");
+}
 
-// Procesar formulario de nueva pregunta
+// Procesar nueva pregunta
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nueva_pregunta'])) {
-    $enunciado = $_POST['enunciado'];
-    $tipo = $_POST['tipo'];
-    $puntos = $_POST['puntos'];
-    crearPregunta($cuestionario_id, $enunciado, $tipo, $puntos);
+    if (!verificarTokenCSRF($_POST['csrf_token'] ?? '')) die("CSRF inválido");
+    crearPregunta($cuestionario_id, $_POST['enunciado'], $_POST['tipo'], $_POST['puntos']);
+    $_SESSION['mensaje'] = "Pregunta agregada";
     header("Location: editar_preguntas.php?id=$cuestionario_id");
     exit;
 }
 
-// Procesar eliminación de pregunta
+// Eliminar pregunta
 if (isset($_GET['eliminar_pregunta'])) {
-    eliminarPregunta($_GET['eliminar_pregunta']);
+    eliminarPregunta((int)$_GET['eliminar_pregunta']);
+    $_SESSION['mensaje'] = "Pregunta eliminada";
     header("Location: editar_preguntas.php?id=$cuestionario_id");
     exit;
 }
 
-// Procesar opciones
+// Guardar opciones (después de enviar el formulario de opciones)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_opciones'])) {
-    foreach($_POST['opciones'] as $pregunta_id => $opciones) {
-        // Primero eliminar opciones existentes de esa pregunta
+    if (!verificarTokenCSRF($_POST['csrf_token'] ?? '')) die("CSRF inválido");
+    foreach ($_POST['opciones'] as $pregunta_id => $opciones) {
+        // Eliminar opciones existentes de esa pregunta
         $pdo->prepare("DELETE FROM opciones WHERE pregunta_id = ?")->execute([$pregunta_id]);
-        foreach($opciones as $opcion) {
+        foreach ($opciones as $opcion) {
             if (trim($opcion['texto']) != '') {
                 $es_correcta = isset($opcion['correcta']) ? 1 : 0;
                 crearOpcion($pregunta_id, $opcion['texto'], $es_correcta);
             }
         }
     }
-    $mensaje = "Opciones guardadas";
+    $_SESSION['mensaje'] = "Opciones guardadas";
+    header("Location: editar_preguntas.php?id=$cuestionario_id");
+    exit;
 }
 
 $preguntas = obtenerPreguntas($cuestionario_id);
@@ -46,7 +51,11 @@ $preguntas = obtenerPreguntas($cuestionario_id);
 <div class="card">
     <div class="card-header">Preguntas - <?= htmlspecialchars($cuestionario['titulo']) ?></div>
     <div class="card-body">
-        <form method="POST" class="mb-4 border p-3">
+        <?php if (isset($_SESSION['mensaje'])): ?><div class="alert alert-success"><?= $_SESSION['mensaje']; unset($_SESSION['mensaje']); ?></div><?php endif; ?>
+        
+        <!-- Formulario para agregar pregunta -->
+        <form method="POST" class="border p-3 mb-4">
+            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF() ?>">
             <h5>Agregar nueva pregunta</h5>
             <div class="mb-2"><label>Enunciado</label><input type="text" name="enunciado" class="form-control" required></div>
             <div class="row">
@@ -55,22 +64,23 @@ $preguntas = obtenerPreguntas($cuestionario_id);
             </div>
             <button type="submit" name="nueva_pregunta" class="btn btn-primary mt-2">Agregar pregunta</button>
         </form>
-        
-        <?php if(isset($mensaje)): ?><div class="alert alert-success"><?= $mensaje ?></div><?php endif; ?>
-        
+
+        <!-- Formulario para opciones de cada pregunta -->
         <form method="POST">
-        <?php foreach($preguntas as $p): ?>
+            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF() ?>">
+            <?php foreach ($preguntas as $p): ?>
             <div class="card mb-3">
                 <div class="card-header d-flex justify-content-between">
-                    <strong><?= htmlspecialchars($p['enunciado']) ?></strong>
+                    <strong><?= htmlspecialchars($p['enunciado']) ?> (<?= $p['puntos'] ?> ptos, <?= $p['tipo'] == 'multiple' ? 'Múltiple' : 'V/F' ?>)</strong>
                     <a href="?id=<?= $cuestionario_id ?>&eliminar_pregunta=<?= $p['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar pregunta?')">Eliminar</a>
                 </div>
                 <div class="card-body">
-                    <input type="hidden" name="opciones[<?= $p['id'] ?>][pregunta]" value="<?= $p['id'] ?>">
+                    <?php
+                    $opciones = obtenerOpciones($p['id']);
+                    $num_opciones = ($p['tipo'] == 'multiple') ? 4 : 2;
+                    ?>
                     <div id="opciones-<?= $p['id'] ?>">
-                        <?php
-                        $opciones = obtenerOpciones($p['id']);
-                        for ($i=0; $i<max(4, count($opciones)); $i++):
+                        <?php for ($i=0; $i<$num_opciones; $i++):
                             $texto = isset($opciones[$i]) ? $opciones[$i]['texto'] : '';
                             $es_correcta = isset($opciones[$i]) && $opciones[$i]['es_correcta'];
                         ?>
@@ -82,8 +92,8 @@ $preguntas = obtenerPreguntas($cuestionario_id);
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
-        <button type="submit" name="guardar_opciones" class="btn btn-success">Guardar todas las opciones</button>
+            <?php endforeach; ?>
+            <button type="submit" name="guardar_opciones" class="btn btn-success">Guardar todas las opciones</button>
         </form>
     </div>
 </div>
