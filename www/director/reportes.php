@@ -154,41 +154,53 @@ if (isset($_GET['tipo'])) {
     // Contenido de la tabla según el tipo
     if ($tipo == 'usuarios') {
         $data = $pdo->query("SELECT id, nombre, email, rol, created_at FROM usuarios ORDER BY rol, nombre")->fetchAll();
-        $html .= "<table><thead> <th>ID</th><th>Nombre completo</th><th>Correo electrónico</th><th>Rol</th><th>Fecha registro</th> </thead><tbody>";
+        $html .= "<table>
+                    <thead>
+                        <tr><th>ID</th><th>Nombre completo</th><th>Correo electrónico</th><th>Rol</th><th>Fecha registro</th></tr>
+                    </thead>
+                    <tbody>";
         foreach ($data as $row) {
             $html .= "<tr>
-                        <td>{$row['id']}</td>
+                        <td>" . $row['id'] . "</td>
                         <td>" . htmlspecialchars($row['nombre']) . "</td>
                         <td>" . htmlspecialchars($row['email']) . "</td>
                         <td>" . htmlspecialchars($row['rol']) . "</td>
-                        <td>{$row['created_at']}</td>
-                    </tr>";
+                        <td>" . $row['created_at'] . "</td>
+                      </tr>";
         }
         $html .= "</tbody></table>";
     } elseif ($tipo == 'cursos') {
         $data = $pdo->query("SELECT c.id, c.nombre, c.descripcion, c.anio, COUNT(e.user_id) as estudiantes FROM cursos c LEFT JOIN estudiantes e ON c.id = e.curso_id GROUP BY c.id")->fetchAll();
-        $html .= "</table><thead> <th>ID</th><th>Curso</th><th>Descripción</th><th>Año</th><th>Estudiantes</th> </thead><tbody>";
+        $html .= "<table>
+                    <thead>
+                        <tr><th>ID</th><th>Curso</th><th>Descripción</th><th>Año</th><th>Estudiantes</th></tr>
+                    </thead>
+                    <tbody>";
         foreach ($data as $row) {
             $html .= "<tr>
-                        <td>{$row['id']}</td>
+                        <td>" . $row['id'] . "</td>
                         <td>" . htmlspecialchars($row['nombre']) . "</td>
                         <td>" . htmlspecialchars($row['descripcion']) . "</td>
-                        <td>{$row['anio']}</td>
-                        <td>{$row['estudiantes']}</td>
-                    </tr>";
+                        <td>" . $row['anio'] . "</td>
+                        <td>" . $row['estudiantes'] . "</td>
+                      </tr>";
         }
         $html .= "</tbody></table>";
     } elseif ($tipo == 'tareas') {
         $data = $pdo->query("SELECT t.titulo, c.nombre as curso, a.nombre as asignatura, t.fecha_entrega, u.nombre as profesor FROM tareas t JOIN cursos c ON t.curso_id = c.id JOIN asignaturas a ON t.asignatura_id = a.id JOIN usuarios u ON t.creado_por = u.id ORDER BY t.fecha_entrega")->fetchAll();
-        $html .= "<table><thead> <th>Título</th><th>Curso</th><th>Asignatura</th><th>Fecha entrega</th><th>Profesor</th> </thead><tbody>";
+        $html .= "<table>
+                    <thead>
+                        <tr><th>Título</th><th>Curso</th><th>Asignatura</th><th>Fecha entrega</th><th>Profesor</th></tr>
+                    </thead>
+                    <tbody>";
         foreach ($data as $row) {
             $html .= "<tr>
                         <td>" . htmlspecialchars($row['titulo']) . "</td>
                         <td>" . htmlspecialchars($row['curso']) . "</td>
                         <td>" . htmlspecialchars($row['asignatura']) . "</td>
-                        <td>{$row['fecha_entrega']}</td>
+                        <td>" . $row['fecha_entrega'] . "</td>
                         <td>" . htmlspecialchars($row['profesor']) . "</td>
-                    </tr>";
+                      </tr>";
         }
         $html .= "</tbody></table>";
     }
