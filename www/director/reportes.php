@@ -140,8 +140,8 @@ if (isset($_GET['tipo'])) {
         <div class='certificado'>
             <div class='sello'>CERTIFICADO<br>OFICIAL</div>
             <div class='header'>
-                <h1>COLEGIO SAN MIGUEL</h1>
-                <p>Educación de Excelencia | Fundado en 1990 | RUT: 99.999.999-9</p>
+                <h1>MI COLEGIO</h1>
+                <p>Educación de Excelencia</p>
             </div>
             <div class='titulo'>CERTIFICADO DE REPORTE - " . strtoupper($tipo) . "</div>
             <div class='info'>
@@ -154,7 +154,7 @@ if (isset($_GET['tipo'])) {
     // Contenido de la tabla según el tipo
     if ($tipo == 'usuarios') {
         $data = $pdo->query("SELECT id, nombre, email, rol, created_at FROM usuarios ORDER BY rol, nombre")->fetchAll();
-        $html .= "<table><thead><tr><th>ID</th><th>Nombre completo</th><th>Correo electrónico</th><th>Rol</th><th>Fecha registro</th></tr></thead><tbody>";
+        $html .= "<table><thead> <th>ID</th><th>Nombre completo</th><th>Correo electrónico</th><th>Rol</th><th>Fecha registro</th> </thead><tbody>";
         foreach ($data as $row) {
             $html .= "<tr>
                         <td>{$row['id']}</td>
@@ -167,7 +167,7 @@ if (isset($_GET['tipo'])) {
         $html .= "</tbody></table>";
     } elseif ($tipo == 'cursos') {
         $data = $pdo->query("SELECT c.id, c.nombre, c.descripcion, c.anio, COUNT(e.user_id) as estudiantes FROM cursos c LEFT JOIN estudiantes e ON c.id = e.curso_id GROUP BY c.id")->fetchAll();
-        $html .= "<table><thead><tr><th>ID</th><th>Curso</th><th>Descripción</th><th>Año</th><th>Estudiantes</th></tr></thead><tbody>";
+        $html .= "</table><thead> <th>ID</th><th>Curso</th><th>Descripción</th><th>Año</th><th>Estudiantes</th> </thead><tbody>";
         foreach ($data as $row) {
             $html .= "<tr>
                         <td>{$row['id']}</td>
@@ -180,7 +180,7 @@ if (isset($_GET['tipo'])) {
         $html .= "</tbody></table>";
     } elseif ($tipo == 'tareas') {
         $data = $pdo->query("SELECT t.titulo, c.nombre as curso, a.nombre as asignatura, t.fecha_entrega, u.nombre as profesor FROM tareas t JOIN cursos c ON t.curso_id = c.id JOIN asignaturas a ON t.asignatura_id = a.id JOIN usuarios u ON t.creado_por = u.id ORDER BY t.fecha_entrega")->fetchAll();
-        $html .= "<table><thead><tr><th>Título</th><th>Curso</th><th>Asignatura</th><th>Fecha entrega</th><th>Profesor</th></tr></thead><tbody>";
+        $html .= "<table><thead> <th>Título</th><th>Curso</th><th>Asignatura</th><th>Fecha entrega</th><th>Profesor</th> </thead><tbody>";
         foreach ($data as $row) {
             $html .= "<tr>
                         <td>" . htmlspecialchars($row['titulo']) . "</td>
@@ -188,7 +188,7 @@ if (isset($_GET['tipo'])) {
                         <td>" . htmlspecialchars($row['asignatura']) . "</td>
                         <td>{$row['fecha_entrega']}</td>
                         <td>" . htmlspecialchars($row['profesor']) . "</td>
-                     </tr>";
+                    </tr>";
         }
         $html .= "</tbody></table>";
     }
