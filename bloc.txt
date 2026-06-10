@@ -81,5 +81,4 @@ webb/
 │       ├── asignaturas_por_curso.php
 │       └── buscar_usuarios.php      (para mensajería)
 └── vendor/                           (autogenerado por Composer, contiene dompdf, phpmailer, etc.)
-Proyecto finalizado!
-
+Proyecto finalizado!!
